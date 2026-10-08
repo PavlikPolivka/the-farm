@@ -1,51 +1,52 @@
-# Deploying Pixel Farm to the homelab (M0)
+# Deploying Pixel Farm to the homelab
 
-Claude Code prepares these files. Pavel applies them on the homelab. Do the steps in order and tick them off.
+## How the homelab is wired (surveyed 2026-10-08)
+- Docker apps live in `/opt/<app>` on the external network `portal`.
+- Caddy (`/opt/caddy/Caddyfile`) listens on one port per app (`:9081`–`:9096`) and has no TLS.
+- The Cloudflare tunnel is token-managed. The dashboard maps each hostname to `http://caddy:<port>`.
+- Authelia 4.39 uses a file backend with groups `admins` (Pavel) and `family` (Pavel, Nikola).
+- Pixel Farm gets **`:9097`** and **farm.ppolivka.com**.
+- Who can play: `PLAY_GROUPS=family,pixel-farm`; admins: `ADMIN_GROUPS=admins`.
+  - The kid gets only `pixel-farm`. `family` would also unlock portal, scan, crm, pdf, printer and druhy.
 
-## 1. Authelia users and groups
-- [ ] Find the user backend (file `users_database.yml` or LDAP).
-- [ ] Add groups `pixel-farm` and `pixel-farm-admin` to Pavel's user.
-- [ ] Create accounts for the wife and the kid with group `pixel-farm`. See `authelia-users.yml`.
-  - `displayname` becomes the in-game player name on first login. An admin can change it later.
+## Already done by Claude Code (no sudo needed)
+- [x] `~/pixel-farm-staging/.env` (mode 600) with a session secret, VAPID keys and the OIDC client secret. These were generated on the homelab and never left it.
+- [x] `~/pixel-farm-staging/oidc-client-digest`: the pbkdf2 digest of that secret, for Authelia.
+- [x] `compose.yml`, `Caddyfile.snippet` and `homelab-setup.sh` uploaded to the staging directory.
+- [x] Image pulled and smoke-tested with the real `.env`:
+  - `/healthz` works.
+  - `/api/me` returns 401.
+  - `/auth/login` returns 302 to `auth.ppolivka.com` with PKCE.
+- [x] Dry runs: the Caddyfile with the new block and the Authelia config with the new client both validate.
 
-## 2. Authelia OIDC client
-- [ ] Run `authelia --version` and compare `authelia-client.yml` with the docs for that version.
-- [ ] Generate the client secret. The command is in the header of `authelia-client.yml`.
-  - The plain-text secret goes in `.env` (step 5).
-  - The `$pbkdf2-sha512$…` digest goes in the Authelia config.
-- [ ] Merge the client into `identity_providers.oidc.clients`.
-- [ ] Restart Authelia and check the log for config errors.
-- [ ] `curl https://auth.ppolivka.com/.well-known/openid-configuration` returns JSON.
-
-## 3. Caddy
-- [ ] Add the `Caddyfile.snippet` site block. Use the `portal` network variant, or the loopback variant if Caddy runs on the host.
-- [ ] Do **not** add `forward_auth` to this site.
-- [ ] Reload Caddy.
-
-## 4. Cloudflare Tunnel
-- [ ] Add the `farm.ppolivka.com` ingress from `cloudflared-ingress.yml`, matching the existing hostnames, or add it in the Zero Trust dashboard.
-- [ ] Make sure the DNS record exists (`cloudflared tunnel route dns <tunnel> farm.ppolivka.com` or the dashboard).
-
-## 5. App container
+## Pavel: run the sudo script (about 2 minutes)
 ```sh
-sudo mkdir -p /opt/pixel-farm/data && cd /opt/pixel-farm
-sudo chown 1000:1000 data            # the container runs as uid 1000 (node)
-# copy compose.yml and .env.example from this repo's deploy/ folder
-cp .env.example .env && chmod 600 .env
-openssl rand -base64 48              # → SESSION_SECRET
-npx web-push generate-vapid-keys     # → VAPID_PUBLIC_KEY / VAPID_PRIVATE_KEY (or `pnpm vapid` in the repo)
-# fill in .env, including OIDC_CLIENT_SECRET from step 2
+ssh pavel@192.168.0.113
+sudo bash ~/pixel-farm-staging/homelab-setup.sh
 ```
-- [ ] The image is `ghcr.io/pavlikpolivka/the-farm:latest`, built by GitHub Actions on every push to `main`. If the GHCR package is private, run one of these:
-  - `docker login ghcr.io -u PavlikPolivka` with a PAT that has `read:packages`, or
-  - make the package public under GitHub → Packages → the-farm → Settings.
-- [ ] `docker compose pull && docker compose up -d`
-- [ ] `docker compose logs -f`. Expect no "OIDC not configured" or "VAPID" warnings.
-- [ ] `curl -s https://farm.ppolivka.com/healthz` returns `{"ok":true,...}`.
+It asks before each step, backs up every file it edits (`*.bak-pixel-farm-<timestamp>`), and skips steps that are already done.
 
-Updating later: `docker compose pull && docker compose up -d`.
+1. Creates `/opt/pixel-farm` (owned by `pavel`), installs `.env` and `compose.yml`, and starts the container.
+2. Appends `:9097 → pixel-farm:3000` to the Caddyfile, validates it, and reloads Caddy (no restart).
+3. Creates the kid's Authelia account in group `pixel-farm`. It prompts for username, display name and password.
+4. Adds the `pixel-farm` OIDC client, validates the config, and restarts Authelia.
+   - Other SSO logins blip for a few seconds.
+   - If Authelia doesn't come back healthy, it rolls back automatically.
 
-## 6. M0 exit test (real devices)
+## Pavel: Cloudflare dashboard
+Zero Trust → Networks → Tunnels → (tunnel) → Public Hostname → Add:
+- Subdomain `farm`, domain `ppolivka.com`
+- Type **HTTP**, URL **caddy:9097**
+
+Then `curl -s https://farm.ppolivka.com/healthz` should return `{"ok":true,...}`.
+
+## Updating later
+```sh
+cd /opt/pixel-farm && docker compose pull && docker compose up -d
+```
+`pavel` owns `/opt/pixel-farm` and is in the `docker` group, so no sudo is needed.
+
+## M0 exit test (real devices)
 This is the gate for the whole auth design. Report each result back.
 
 **iPhone (Safari, iOS 16.4+)**
@@ -53,7 +54,7 @@ This is the gate for the whole auth design. Report each result back.
 2. [ ] Open the app from the home screen. The footer should say `app`, not `browser`.
 3. [ ] Tap **Log in**, sign in at Authelia, and confirm you land back in the app with "Hi, <name>!".
    - Note whether the return trip lands in the installed app or in a Safari overlay.
-4. [ ] Kill the app from the app switcher and reopen it. It should still say "Hi, <name>!" with no login prompt.
+4. [ ] Kill the app from the app switcher and reopen it. It should still say "Hi, <name>!".
 5. [ ] Tap **Enable notifications**, then allow.
 6. [ ] Tap **Send test notification**, then lock the phone. "Hello from the farm 🌾" should arrive.
 

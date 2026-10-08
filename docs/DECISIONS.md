@@ -22,3 +22,6 @@ The interview record in `DESIGN.md` is fixed. This file records every default Cl
 | 14 | M0 strings are a tiny in-file dictionary; i18next + ICU plurals arrive in M1 | M0 has ~15 strings. |
 | 15 | Temporary 10-colour palette in `scripts/sprites/palette.ts`, replaced by the palette extracted from the Kenney pack in M1 | Icons are needed before any packs are downloaded. |
 | 16 | Service worker built with `injectManifest`; `/api`, `/auth`, `/healthz` are `NetworkOnly` and excluded from the navigation fallback; `index.html`, `sw.js` and the manifest are served `no-cache` | Required by the design doc; ensures deploys are picked up on the next launch. |
+| 17 | Homelab: Claude Code stages everything it can as `pavel` (secrets generated on the homelab, smoke tests, dry-run validation); root-owned edits go through `deploy/homelab-setup.sh`, which Pavel runs with sudo | Pavel's instruction (2026-10-08); no passwordless sudo on the box. |
+| 18 | Reuse Authelia groups: `PLAY_GROUPS=family,pixel-farm`, `ADMIN_GROUPS=admins`; the kid gets only `pixel-farm` | `family` grants forward-auth access to portal, scan, crm, pdf, printer and druhy, which the kid shouldn't have. |
+| 19 | Caddy site `:9097`, tunnel hostname `farm.ppolivka.com → http://caddy:9097` | Matches the existing port-per-app layout. |
