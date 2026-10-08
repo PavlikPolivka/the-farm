@@ -61,4 +61,40 @@ export interface FamilyMember {
   weekCoins: number;
   /** Last accepted save, ms since epoch; null before the first sync. */
   lastSeen: number | null;
+  /** Won yesterday's daily challenge: wears the crown today. */
+  crown: boolean;
+}
+
+/** Daily challenge state for the caller. `crown` is yesterday's winner, who wears it today. */
+export interface DailyInfo {
+  day: string;
+  game: import('./games/engine.js').GameId;
+  status: 'open' | 'started' | 'done';
+  score: number | null;
+  rank: number | null;
+  players: number;
+  crown: { userId: number; name: string } | null;
+}
+
+/** GET /api/games */
+export interface GamesInfo {
+  daily: DailyInfo;
+  games: { id: import('./games/engine.js').GameId; best: number | null; rewardsLeft: number }[];
+}
+
+/** POST /api/daily/start */
+export interface DailyStart {
+  day: string;
+  game: import('./games/engine.js').GameId;
+  seed: number;
+}
+
+/** POST /api/minigame/result and /api/daily/result */
+export interface PlayResult {
+  score: number;
+  best: number;
+  /** Apply with the farm's `reward` action. null once today's rewards are used up. */
+  reward: { id: number; coins: number; xp: number } | null;
+  rewardsLeft: number;
+  rank?: number;
 }

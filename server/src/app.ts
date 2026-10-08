@@ -6,6 +6,7 @@ import { registerAuth, requireUser } from './auth.js';
 import type { Config } from './config.js';
 import type { DB } from './db.js';
 import { registerBoards } from './boards.js';
+import { registerGames } from './games.js';
 import { registerPush } from './push.js';
 import { registerSaves } from './saves.js';
 import { getMe } from './users.js';
@@ -21,6 +22,7 @@ export async function buildApp(cfg: Config, db: DB, clock: () => number = Date.n
   registerPush(app, cfg, db);
   registerSaves(app, db, clock);
   registerBoards(app, db, clock);
+  registerGames(app, cfg, db, clock);
 
   app.get('/healthz', async () => ({ ok: true, version: APP_VERSION }));
 

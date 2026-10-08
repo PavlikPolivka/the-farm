@@ -3,6 +3,7 @@ import {
   checkSave,
   isSaveError,
   level,
+  migrate,
   parseSave,
   weekKey,
   type FarmState,
@@ -12,6 +13,7 @@ import {
 } from '@pixel-farm/shared';
 import { requireUser } from './auth.js';
 import type { DB } from './db.js';
+import { granted } from './games.js';
 
 interface SaveRow {
   version: number;
@@ -20,7 +22,7 @@ interface SaveRow {
 
 export function loadSave(db: DB, userId: number): { version: number; state: FarmState } | null {
   const row = db.prepare('SELECT version, state_json FROM saves WHERE user_id = ?').get(userId) as SaveRow | undefined;
-  return row ? { version: row.version, state: JSON.parse(row.state_json) as FarmState } : null;
+  return row ? { version: row.version, state: migrate(JSON.parse(row.state_json)) } : null;
 }
 
 /**
@@ -73,7 +75,7 @@ export function registerSaves(app: FastifyInstance, db: DB, clock: () => number 
       if (body.baseVersion !== version) return { code: 409, body: { version, state: current?.state ?? null } satisfies SaveResponse };
 
       const now = clock();
-      const verdict = checkSave(current?.state ?? null, next, now);
+      const verdict = checkSave(current?.state ?? null, next, now, granted(db, userId));
       if (!verdict.ok) {
         req.log.warn({ userId, reason: verdict.reason }, 'save rejected');
         return { code: 422, body: { error: 'rejected', reason: verdict.reason, version, state: current?.state ?? null } };

@@ -59,12 +59,14 @@ export type Action =
   | { type: 'buyHelper'; at: number; helper: HelperId }
   | { type: 'setAutoCrop'; at: number; field: number; crop: CropId }
   | { type: 'deliver'; at: number; order: number }
-  | { type: 'tutorial'; at: number; step: number };
+  | { type: 'tutorial'; at: number; step: number }
+  /** A minigame reward granted by the server (ids increase per player). */
+  | { type: 'reward'; at: number; id: number; coins: number; xp: number };
 
 export type FailReason = 'coins' | 'locked' | 'max' | 'busy' | 'empty' | 'unripe' | 'items' | 'invalid';
 
 export type SimEvent =
-  | { type: 'coins'; amount: number; source: 'tap' | 'harvest' | 'sell' | 'order' | 'mill' }
+  | { type: 'coins'; amount: number; source: 'tap' | 'harvest' | 'sell' | 'order' | 'mill' | 'minigame' }
   | { type: 'harvest'; field: number; crop: CropId; qty: number; combo: number; auto: boolean }
   | { type: 'produce'; good: GoodId; qty: number }
   | { type: 'levelUp'; level: number; unlocks: string[] }
@@ -204,6 +206,16 @@ export function apply(s: FarmState, a: Action): Result {
       events.push({ type: 'coins', amount: o.coins, source: 'order' }, { type: 'orderDone', id: o.id });
       addXp(s, o.xp, events);
       fillOrders(s);
+      break;
+    }
+    case 'reward': {
+      if (!(a.id > s.lastRewardId) || !(a.coins >= 0) || !(a.xp >= 0)) return fail('invalid');
+      s.lastRewardId = a.id;
+      earn(s, a.coins);
+      s.stats.rewardCoins += a.coins;
+      s.stats.rewardXp += a.xp;
+      events.push({ type: 'coins', amount: a.coins, source: 'minigame' });
+      addXp(s, a.xp, events);
       break;
     }
     case 'tutorial': {

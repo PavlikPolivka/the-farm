@@ -2,7 +2,7 @@
 
 A family pixel-art farm clicker PWA. See [docs/DESIGN.md](docs/DESIGN.md) for the spec, [docs/DECISIONS.md](docs/DECISIONS.md) for the decisions made while building, and [deploy/DEPLOY.md](deploy/DEPLOY.md) for homelab setup.
 
-**Status:** M2: save sync with a plausibility clamp, family bar and six leaderboards, on top of the M1 farm loop. M0 passed on Android; the iPhone login test is pending.
+**Status:** M3: five minigames with server replay, free-play rewards, the daily challenge and its crown, on top of save sync, boards (M2) and the farm loop (M1). M0 passed on Android; the iPhone login test is pending.
 
 ## Develop
 Requires Node 22 (`nvm use`) and pnpm 10 (`corepack enable`).
@@ -27,7 +27,7 @@ pnpm dev                           # server :3000, Vite :5173 (proxies /api and 
 ## Layout
 | Folder | Contents |
 |---|---|
-| `shared/` | types, game config, (later) simulation and minigame engines |
+| `shared/` | types, game config, farm simulation, save validation, minigame engines (`src/games`) |
 | `server/` | Fastify API, OIDC login, sessions, Web Push, SQLite |
 | `client/` | Phaser 3 game, PWA manifest and service worker (`client/sw/`) |
 | `scripts/` | asset pipeline (`scripts/assets`), balance sim, VAPID key generator |

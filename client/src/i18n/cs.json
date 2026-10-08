@@ -12,7 +12,8 @@
     "barn": "Stodola",
     "orders": "Zakázky",
     "settings": "Nastavení",
-    "boards": "Žebříčky"
+    "boards": "Žebříčky",
+    "games": "Hry"
   },
   "common": {
     "close": "Zavřít",
@@ -186,7 +187,8 @@
   },
   "family": {
     "title": "Rodina",
-    "login": "Přihlas se a hraj s rodinou"
+    "login": "Přihlas se a hraj s rodinou",
+    "crown": "Včera vyhrál(a) výzvu"
   },
   "boards": {
     "title": "Žebříčky",
@@ -217,5 +219,60 @@
     "offline": "Bez připojení. Farma je uložená v telefonu a pošle se později.",
     "loaded": "Farma se načetla ze serveru.",
     "adjusted": "Server farmy tvou farmu trochu opravil."
+  },
+  "games": {
+    "pexeso": {
+      "name": "Pexeso",
+      "how": "Najdi dvojice. Otoč dvě kartičky; když jsou stejné, zůstanou otočené."
+    },
+    "pipes": {
+      "name": "Vodovod",
+      "how": "Ťukáním otáčej trubky. Doveď vodu ze studny na pole."
+    },
+    "merge": {
+      "name": "Spojovačka",
+      "how": "Posouvej prstem. Dvě stejné věci vyrostou ve větší."
+    },
+    "rush": {
+      "name": "Rychlá sklizeň",
+      "how": "Ťukej na zralou úrodu (třpytí se). Na plevel a malé výhonky neťukej!"
+    },
+    "eggs": {
+      "name": "Třídění vajec",
+      "how": "Ťukni na košík a pak na jiný, přesune se horní vajíčko. Každý druh vajíček do svého košíku."
+    }
+  },
+  "gamesSheet": {
+    "title": "Hry",
+    "daily": "Dnešní výzva",
+    "dailyOpen": "Stejné zadání pro celou rodinu. Počítá se jen první pokus.",
+    "dailyStarted": "Dnešní výzvu už máš odehranou.",
+    "dailyDone": "Tvé skóre: {score} · {rank}. místo z {players}",
+    "crown": "{name} včera vyhrál(a) a nosí korunu",
+    "loginFirst": "Po přihlášení můžeš hrát výzvu a získávat odměny.",
+    "play": "Hrát",
+    "practice": "Trénink",
+    "rewardsLeft": "{count, plural, one {Dnes ještě # odměna} few {Dnes ještě # odměny} other {Dnes ještě # odměn}}"
+  },
+  "play": {
+    "start": "Začít",
+    "ranked": "Tohle je tvůj soutěžní pokus.",
+    "quit": "Ukončit hru",
+    "quitConfirm": "Konec?",
+    "saving": "Ukládání…",
+    "done": "Výborně!",
+    "timeUp": "Čas vypršel!",
+    "score": "Skóre: {score}",
+    "best": "Nejlepší: {best}",
+    "newBest": "Nový rekord!",
+    "rank": "Dnes {rank}. místo",
+    "noRewards": "Dnešní odměny už jsou vybrané – teď jen pro radost.",
+    "practice": {
+      "login": "Trénink: po přihlášení získáš odměny.",
+      "offline": "Trénink: bez připojení tentokrát odměna nebude.",
+      "error": "Trénink: server farmy tuhle hru nepřijal."
+    },
+    "again": "Hrát znovu",
+    "close": "Hotovo"
   }
 }

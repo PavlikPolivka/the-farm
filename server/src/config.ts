@@ -6,6 +6,8 @@ export interface Config {
   publicUrl: string;
   dbPath: string;
   sessionSecret: string;
+  /** Key for the daily seed, HMAC-SHA256(key, day). Defaults to the session secret. */
+  dailySecret: string;
   staticDir: string | null;
   oidc: { issuer: string; clientId: string; clientSecret: string } | null;
   vapid: { publicKey: string; privateKey: string; subject: string } | null;
@@ -42,6 +44,7 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): Config {
     publicUrl: (env.PUBLIC_URL ?? 'http://localhost:3000').replace(/\/$/, ''),
     dbPath: env.DB_PATH ?? './data/farm.db',
     sessionSecret,
+    dailySecret: env.DAILY_SECRET || sessionSecret,
     staticDir: env.STATIC_DIR ? resolve(env.STATIC_DIR) : null,
     oidc,
     vapid,

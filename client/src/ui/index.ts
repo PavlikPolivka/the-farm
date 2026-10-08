@@ -9,12 +9,15 @@ import {
   xpForLevel,
   type CropId,
   type FailReason,
+  type GameId,
   type ItemId,
+  type PlayResult,
   type SimEvent,
 } from '@pixel-farm/shared';
 import type { Command, Store } from '../game/store.js';
 import type { Sync, SyncNotice } from '../game/sync.js';
 import { locale, t } from '../i18n/index.js';
+import { playGame, type PlayOutcome } from '../minigames/frame.js';
 import type { FarmScene } from '../scenes/FarmScene.js';
 import { clear, h, sprite } from './dom.js';
 import { floater, toast } from './effects.js';
@@ -63,6 +66,7 @@ export class Ui {
       () => sync.me,
       () => this.open('boards'),
       () => this.open('settings'),
+      () => (this.sheetKind === 'settings' ? this.close() : this.open('settings')),
     );
     this.mount();
     this.tutorial = new Tutorial(store, () => this.scene, () => this.sheetKind);
@@ -107,7 +111,7 @@ export class Ui {
     clear(this.bar);
     const btn = (kind: SheetKind, icon: string) =>
       h('button', { 'data-open': kind, on: { click: () => (this.sheetKind === kind ? this.close() : this.open(kind)) } }, sprite(icon, 2), h('span', null, t(`bar.${kind}`)));
-    this.bar.append(btn('shop', 'coin'), btn('barn', 'barn-icon'), btn('orders', 'sign'), btn('boards', 'trophy'), btn('settings', 'gear'));
+    this.bar.append(btn('shop', 'coin'), btn('barn', 'barn-icon'), btn('orders', 'sign'), btn('games', 'card-back'), btn('boards', 'trophy'));
   }
 
   /** Language changed: rebuild every label. */
@@ -158,6 +162,13 @@ export class Ui {
         }),
       me: () => this.sync.me,
       login: () => location.assign('/auth/login'),
+      games: {
+        me: () => this.sync.me,
+        login: () => location.assign('/auth/login'),
+        toast: (text) => toast(text, 'lock'),
+        playFree: (game) => this.play(game, (Math.random() * 2 ** 32) >>> 0, null),
+        playDaily: (d) => this.play(d.game, d.seed, d.day),
+      },
     });
     this.sheet = sheet;
     const panel = h(
@@ -280,6 +291,47 @@ export class Ui {
   }
 
   // ---------------------------------------------------------------- sync & welcome
+
+  // ---------------------------------------------------------------- minigames
+
+  /** Runs a minigame over everything; free play offers another round with a new seed. */
+  play(game: GameId, seed: number, daily: string | null): void {
+    this.close();
+    this.tutorial.pause(true);
+    playGame({
+      game,
+      seed,
+      daily,
+      submit: (log) => this.submitPlay(game, seed, daily, log),
+      again: daily ? undefined : () => this.play(game, (Math.random() * 2 ** 32) >>> 0, null),
+      onClose: () => {
+        this.tutorial.pause(false);
+        this.open('games');
+      },
+    });
+  }
+
+  /** Sends the input log; the server replays it and grants the reward, applied to the farm here. */
+  private async submitPlay(game: GameId, seed: number, daily: string | null, log: unknown[]): Promise<PlayOutcome> {
+    if (!this.sync.me) return { kind: 'practice', reason: 'login' };
+    let res: Response;
+    try {
+      res = await fetch(daily ? '/api/daily/result' : '/api/minigame/result', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify(daily ? { day: daily, log } : { game, seed, log }),
+      });
+    } catch {
+      return { kind: 'practice', reason: 'offline' };
+    }
+    if (!res.ok) return { kind: 'practice', reason: 'error' };
+    const result = (await res.json()) as PlayResult;
+    if (result.reward) {
+      this.store.dispatch({ type: 'reward', ...result.reward });
+      this.sync.upload();
+    }
+    return { kind: 'result', result };
+  }
 
   private onSync(notice?: SyncNotice): void {
     this.dirty = true;

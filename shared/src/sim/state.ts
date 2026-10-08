@@ -38,7 +38,7 @@ export const TUTORIAL_DONE = TUTORIAL_STEPS.length;
 
 /** The whole single-player save. Plain JSON: no classes, no Dates. */
 export interface FarmState {
-  v: 1;
+  v: 2;
   /** Simulation clock, ms since epoch. */
   t: number;
   createdAt: number;
@@ -61,11 +61,16 @@ export interface FarmState {
   combo: { n: number; lastAt: number };
   lastCrop: CropId;
   tutorial: number;
+  /** Id of the last minigame reward applied, so a reward is never applied twice. */
+  lastRewardId: number;
   stats: {
     taps: number;
     harvested: Record<CropId, number>;
     produced: Record<GoodId, number>;
     ordersDone: number;
+    /** Minigame rewards received in total; the server checks them against what it granted. */
+    rewardCoins: number;
+    rewardXp: number;
   };
 }
 
@@ -73,7 +78,7 @@ const zero = <K extends string>(keys: readonly K[]) => Object.fromEntries(keys.m
 
 export function newGame(now: number, seed: number): FarmState {
   const s: FarmState = {
-    v: 1,
+    v: 2,
     t: now,
     createdAt: now,
     rng: seed | 0,
@@ -93,7 +98,8 @@ export function newGame(now: number, seed: number): FarmState {
     combo: { n: 0, lastAt: 0 },
     lastCrop: 'wheat',
     tutorial: 0,
-    stats: { taps: 0, harvested: zero(CROP_IDS), produced: zero(GOOD_IDS), ordersDone: 0 },
+    lastRewardId: 0,
+    stats: { taps: 0, harvested: zero(CROP_IDS), produced: zero(GOOD_IDS), ordersDone: 0, rewardCoins: 0, rewardXp: 0 },
   };
   return s;
 }
@@ -104,9 +110,16 @@ export function emptyField(): Field {
 
 /** Upgrades older saves to the current shape. Unknown future versions are rejected. */
 export function migrate(raw: unknown): FarmState {
-  const s = raw as FarmState;
-  if (!s || typeof s !== 'object' || s.v !== 1) throw new Error('unsupported save version');
-  return s;
+  const s = raw as Omit<FarmState, 'v'> & { v: number };
+  if (!s || typeof s !== 'object' || (s.v !== 1 && s.v !== 2)) throw new Error('unsupported save version');
+  if (s.v === 1) {
+    // v2 (M3): minigame reward ledger.
+    s.v = 2;
+    s.lastRewardId = 0;
+    s.stats.rewardCoins = 0;
+    s.stats.rewardXp = 0;
+  }
+  return s as FarmState;
 }
 
 export const clone = (s: FarmState): FarmState => JSON.parse(JSON.stringify(s)) as FarmState;

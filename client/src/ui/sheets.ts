@@ -30,9 +30,10 @@ import {
 import type { Command, Store } from '../game/store.js';
 import { locale, t } from '../i18n/index.js';
 import { clear, h, sprite } from './dom.js';
+import { gamesSheet, type GamesCtx } from './games.js';
 import { boardsSheet } from './social.js';
 
-export type SheetKind = 'shop' | 'barn' | 'orders' | 'boards' | 'settings' | 'seeds';
+export type SheetKind = 'shop' | 'barn' | 'orders' | 'games' | 'boards' | 'settings' | 'seeds';
 
 export interface SheetCtx {
   store: Store;
@@ -46,6 +47,7 @@ export interface SheetCtx {
   settings(body: HTMLElement): () => void;
   me(): Me | null;
   login(): void;
+  games: GamesCtx;
 }
 
 export interface Sheet {
@@ -306,6 +308,8 @@ export function buildSheet(kind: SheetKind, ctx: SheetCtx): Sheet {
       return seeds(ctx);
     case 'boards':
       return boardsSheet(ctx);
+    case 'games':
+      return gamesSheet(ctx.games);
     case 'settings': {
       const body = h('div', { class: 'settings' });
       const update = ctx.settings(body);

@@ -44,6 +44,12 @@ export const PLAUSIBLE = {
   maxTapLevel: 200,
 } as const;
 
+/** Minigame rewards the server has granted this player, in total. */
+export interface Granted {
+  coins: number;
+  xp: number;
+}
+
 export type Verdict =
   | { ok: true; state: FarmState; clamped: string[] }
   | { ok: false; reason: string };
@@ -77,7 +83,7 @@ const ITEM_IDS = [...CROP_IDS, ...GOOD_IDS] as const;
 export function parseSave(raw: unknown): FarmState {
   if (!isObj(raw)) fail('not an object');
   const r = raw as Record<string, unknown>;
-  if (r.v !== 1) fail('version');
+  if (r.v !== 1 && r.v !== 2) fail('version');
   const land = int(r.land, 'land', 1, ECONOMY.maxLand);
 
   if (!Array.isArray(r.fields) || r.fields.length < 1 || r.fields.length > land * ECONOMY.fieldsPerLand) fail('fields');
@@ -137,7 +143,7 @@ export function parseSave(raw: unknown): FarmState {
   const stats = r.stats as Record<string, unknown>;
 
   return {
-    v: 1,
+    v: 2,
     t: num(r.t, 't'),
     createdAt: num(r.createdAt, 'createdAt'),
     rng: int(r.rng, 'rng', -(2 ** 31), 2 ** 32),
@@ -157,11 +163,14 @@ export function parseSave(raw: unknown): FarmState {
     combo: { n: int(combo.n, 'combo.n'), lastAt: num(combo.lastAt, 'combo.lastAt') },
     lastCrop: oneOf(r.lastCrop, CROP_IDS, 'lastCrop'),
     tutorial: int(r.tutorial, 'tutorial', 0, TUTORIAL_DONE),
+    lastRewardId: r.v === 1 ? 0 : int(r.lastRewardId, 'lastRewardId'),
     stats: {
       taps: int(stats.taps, 'stats.taps'),
       harvested: record(stats.harvested, CROP_IDS, 'stats.harvested'),
       produced: record(stats.produced, GOOD_IDS, 'stats.produced'),
       ordersDone: int(stats.ordersDone, 'stats.ordersDone'),
+      rewardCoins: r.v === 1 ? 0 : num(stats.rewardCoins, 'stats.rewardCoins'),
+      rewardXp: r.v === 1 ? 0 : num(stats.rewardXp, 'stats.rewardXp'),
     },
   };
 }
@@ -271,11 +280,20 @@ const maxCap = (a: Capacity, b: Capacity): Capacity => ({
  * (null for a first upload), at server time `now`. Returns the possibly clamped state, or a
  * rejection when the farm owns things it could never have paid for.
  */
-export function checkSave(prev: FarmState | null, next: FarmState, now: number): Verdict {
+export function checkSave(prev: FarmState | null, next: FarmState, now: number, granted: Granted = { coins: 0, xp: 0 }): Verdict {
   const s = clone(next);
   const base = prev ?? newGame(s.createdAt, 0);
   const clamped: string[] = [];
   const { slack } = PLAUSIBLE;
+
+  // Minigame rewards: never more than the server has granted in total.
+  if (s.stats.rewardCoins > granted.coins + 1e-6 || s.stats.rewardXp > granted.xp + 1e-6) {
+    s.stats.rewardCoins = Math.min(s.stats.rewardCoins, granted.coins);
+    s.stats.rewardXp = Math.min(s.stats.rewardXp, granted.xp);
+    clamped.push('rewards');
+  }
+  const rewardCoins = Math.max(0, s.stats.rewardCoins - base.stats.rewardCoins);
+  const rewardXp = Math.max(0, s.stats.rewardXp - base.stats.rewardXp);
 
   if (s.fields.filter((f) => f.auto).length > s.fields.length) return { ok: false, reason: 'farmhands' };
 
@@ -294,7 +312,7 @@ export function checkSave(prev: FarmState | null, next: FarmState, now: number):
     const maxOrders = base.stats.ordersDone + ECONOMY.orders.slots + (baseItems + slack * cap.items * sec) / 2;
     orders = Math.min(s.stats.ordersDone, Math.floor(maxOrders));
     // Best case: all harvest XP first, then every order paying the XP of the level reached so far.
-    let maxXp = base.xp + slack * (cap.xpRate * sec + cap.xpLump);
+    let maxXp = base.xp + rewardXp + slack * (cap.xpRate * sec + cap.xpLump);
     for (let i = base.stats.ordersDone; i < orders && maxXp < s.xp; i++) maxXp += orderXp(levelOf(maxXp));
     xp = Math.min(s.xp, maxXp);
     const reached = levelOf(xp);
@@ -312,7 +330,7 @@ export function checkSave(prev: FarmState | null, next: FarmState, now: number):
 
   // Wealth.
   const cap = maxCap(baseCap, capacity(s, levelOf(s.xp)));
-  const maxWealth = wealth(base) + slack * (cap.rate * sec + cap.lump) + 50;
+  const maxWealth = wealth(base) + rewardCoins + slack * (cap.rate * sec + cap.lump) + 50;
   let excess = wealth(s) - maxWealth;
   if (excess > 0) {
     clamped.push('coins');

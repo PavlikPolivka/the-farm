@@ -13,6 +13,7 @@ export class Tutorial {
   private text = h('p');
   private hand = h('div', { class: 'pointer', 'aria-hidden': 'true' }, sprite('hand', 3));
   private taps = 0;
+  private paused = false;
 
   constructor(
     private store: Store,
@@ -30,6 +31,12 @@ export class Tutorial {
       requestAnimationFrame(loop);
     };
     requestAnimationFrame(loop);
+  }
+
+  /** Hidden while a minigame covers the farm. */
+  pause(on: boolean): void {
+    this.paused = on;
+    this.render();
   }
 
   get step(): TutorialStep | null {
@@ -61,14 +68,14 @@ export class Tutorial {
 
   render(): void {
     const step = this.step;
-    this.bubble.hidden = step === null;
-    this.hand.hidden = step === null;
+    this.bubble.hidden = step === null || this.paused;
+    this.hand.hidden = step === null || this.paused;
     if (step) this.text.textContent = t(`tutorial.${step}`);
   }
 
   private place(): void {
     const step = this.step;
-    if (!step) return;
+    if (!step || this.paused) return;
     const sheet = this.openSheet();
     this.bubble.classList.toggle('top', sheet !== null);
     const target = this.target(step, sheet);

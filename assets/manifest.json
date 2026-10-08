@@ -42,6 +42,12 @@
     "license": "CC0-1.0"
   },
   {
+    "file": "sprites/card-back.png",
+    "source": "scripts/assets/generated.ts",
+    "pack": "Pixel Farm (generated)",
+    "license": "CC0-1.0"
+  },
+  {
     "file": "sprites/carrot-1.png",
     "source": "https://kenney.nl/assets/tiny-farm",
     "pack": "Kenney — Tiny Farm (tile 4)",
@@ -105,6 +111,36 @@
     "file": "sprites/cow.png",
     "source": "https://kenney.nl/assets/tiny-farm",
     "pack": "Kenney — Tiny Farm (tile 121)",
+    "license": "CC0-1.0"
+  },
+  {
+    "file": "sprites/crown.png",
+    "source": "scripts/assets/generated.ts",
+    "pack": "Pixel Farm (generated)",
+    "license": "CC0-1.0"
+  },
+  {
+    "file": "sprites/egg-0.png",
+    "source": "scripts/assets/generated.ts",
+    "pack": "Pixel Farm (generated)",
+    "license": "CC0-1.0"
+  },
+  {
+    "file": "sprites/egg-1.png",
+    "source": "scripts/assets/generated.ts",
+    "pack": "Pixel Farm (generated)",
+    "license": "CC0-1.0"
+  },
+  {
+    "file": "sprites/egg-2.png",
+    "source": "scripts/assets/generated.ts",
+    "pack": "Pixel Farm (generated)",
+    "license": "CC0-1.0"
+  },
+  {
+    "file": "sprites/egg-3.png",
+    "source": "scripts/assets/generated.ts",
+    "pack": "Pixel Farm (generated)",
     "license": "CC0-1.0"
   },
   {
@@ -192,7 +228,73 @@
     "license": "CC0-1.0"
   },
   {
+    "file": "sprites/pipe-corner-wet.png",
+    "source": "scripts/assets/generated.ts",
+    "pack": "Pixel Farm (generated)",
+    "license": "CC0-1.0"
+  },
+  {
+    "file": "sprites/pipe-corner.png",
+    "source": "scripts/assets/generated.ts",
+    "pack": "Pixel Farm (generated)",
+    "license": "CC0-1.0"
+  },
+  {
+    "file": "sprites/pipe-cross-wet.png",
+    "source": "scripts/assets/generated.ts",
+    "pack": "Pixel Farm (generated)",
+    "license": "CC0-1.0"
+  },
+  {
+    "file": "sprites/pipe-cross.png",
+    "source": "scripts/assets/generated.ts",
+    "pack": "Pixel Farm (generated)",
+    "license": "CC0-1.0"
+  },
+  {
+    "file": "sprites/pipe-end-wet.png",
+    "source": "scripts/assets/generated.ts",
+    "pack": "Pixel Farm (generated)",
+    "license": "CC0-1.0"
+  },
+  {
+    "file": "sprites/pipe-end.png",
+    "source": "scripts/assets/generated.ts",
+    "pack": "Pixel Farm (generated)",
+    "license": "CC0-1.0"
+  },
+  {
+    "file": "sprites/pipe-straight-wet.png",
+    "source": "scripts/assets/generated.ts",
+    "pack": "Pixel Farm (generated)",
+    "license": "CC0-1.0"
+  },
+  {
+    "file": "sprites/pipe-straight.png",
+    "source": "scripts/assets/generated.ts",
+    "pack": "Pixel Farm (generated)",
+    "license": "CC0-1.0"
+  },
+  {
+    "file": "sprites/pipe-tee-wet.png",
+    "source": "scripts/assets/generated.ts",
+    "pack": "Pixel Farm (generated)",
+    "license": "CC0-1.0"
+  },
+  {
+    "file": "sprites/pipe-tee.png",
+    "source": "scripts/assets/generated.ts",
+    "pack": "Pixel Farm (generated)",
+    "license": "CC0-1.0"
+  },
+  {
     "file": "sprites/scarecrow.png",
+    "source": "scripts/assets/generated.ts",
+    "pack": "Pixel Farm (generated)",
+    "license": "CC0-1.0"
+  },
+  {
+    "file": "sprites/seed.png",
     "source": "scripts/assets/generated.ts",
     "pack": "Pixel Farm (generated)",
     "license": "CC0-1.0"
@@ -273,6 +375,12 @@
     "file": "sprites/trough.png",
     "source": "https://kenney.nl/assets/tiny-farm",
     "pack": "Kenney — Tiny Farm (tile 113)",
+    "license": "CC0-1.0"
+  },
+  {
+    "file": "sprites/weed.png",
+    "source": "scripts/assets/generated.ts",
+    "pack": "Pixel Farm (generated)",
     "license": "CC0-1.0"
   },
   {

@@ -64,6 +64,21 @@ const MIGRATIONS: string[] = [
      updated_at INTEGER NOT NULL,
      PRIMARY KEY (user_id, game)
    );`,
+  // M3: every rewarded minigame play (the ledger saves are checked against), finished dailies.
+  `CREATE TABLE minigame_plays (
+     id INTEGER PRIMARY KEY,
+     user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+     game TEXT NOT NULL,
+     day TEXT NOT NULL,
+     seed INTEGER NOT NULL,
+     score INTEGER NOT NULL,
+     ranked INTEGER NOT NULL DEFAULT 0,
+     coins REAL NOT NULL,
+     xp REAL NOT NULL,
+     created_at INTEGER NOT NULL
+   );
+   CREATE INDEX minigame_plays_user_day ON minigame_plays(user_id, day, game);
+   ALTER TABLE daily_results ADD COLUMN finished_at INTEGER;`,
 ];
 
 export function openDb(path: string): DB {

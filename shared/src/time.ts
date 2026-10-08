@@ -29,3 +29,9 @@ export function weekKey(ms: number): string {
   const { y, m, d, weekday } = prague(ms);
   return iso(Date.UTC(y, m - 1, d) - weekday * DAY_MS);
 }
+
+/** Days since 1970-01-01 for a day key. */
+export const dayNumber = (day: string) => Math.round(Date.parse(`${day}T00:00:00Z`) / DAY_MS);
+
+/** The day before a day key ("2026-10-01" → "2026-09-30"). */
+export const prevDay = (day: string) => iso(Date.parse(`${day}T00:00:00Z`) - DAY_MS);

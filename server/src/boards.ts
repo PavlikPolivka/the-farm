@@ -1,7 +1,8 @@
 import type { FastifyInstance } from 'fastify';
-import { BOARD_IDS, dayKey, weekKey, type Board, type BoardId, type BoardRow, type FamilyMember } from '@pixel-farm/shared';
+import { BOARD_IDS, dayKey, prevDay, weekKey, type Board, type BoardId, type BoardRow, type FamilyMember } from '@pixel-farm/shared';
 import { requireUser } from './auth.js';
 import type { DB } from './db.js';
+import { crownFor } from './games.js';
 
 interface Scored {
   userId: number;
@@ -69,7 +70,7 @@ export function buildBoard(db: DB, board: BoardId, now: number): Board {
       const rows = db
         .prepare(
           `SELECT d.user_id AS userId, u.display_name AS name, d.score AS value
-           FROM daily_results d JOIN users u ON u.id = d.user_id WHERE d.date = ?`,
+           FROM daily_results d JOIN users u ON u.id = d.user_id WHERE d.date = ? AND d.finished_at IS NOT NULL`,
         )
         .all(dayKey(now)) as Scored[];
       return { board, sections: [{ rows: rank(rows) }] };
@@ -89,6 +90,7 @@ export function buildBoard(db: DB, board: BoardId, now: number): Board {
 
 export function family(db: DB, me: number, now: number): FamilyMember[] {
   const week = weekKey(now);
+  const crown = crownFor(db, prevDay(dayKey(now)))?.userId ?? null;
   const players = db.prepare(`${PLAYERS} ORDER BY u.id`).all() as PlayerRow[];
   const list = players.map(
     (p): FamilyMember => ({
@@ -98,6 +100,7 @@ export function family(db: DB, me: number, now: number): FamilyMember[] {
       lifetimeCoins: p.lifetime_coins ?? 0,
       weekCoins: p.week_key === week ? (p.week_coins ?? 0) : 0,
       lastSeen: p.updated_at,
+      crown: p.userId === crown,
     }),
   );
   return [...list.filter((p) => p.id === me), ...list.filter((p) => p.id !== me)];

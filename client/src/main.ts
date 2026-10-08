@@ -7,13 +7,14 @@ import { initI18n, t } from './i18n/index.js';
 import { FarmScene } from './scenes/FarmScene.js';
 import { toast } from './ui/effects.js';
 import { Ui } from './ui/index.js';
+import * as minigame from './minigames/frame.js';
 import { prefersReducedMotion, setReducedMotion } from './ui/prefs.js';
 import './style.css';
 
 declare global {
   interface Window {
     /** Debug / e2e handle. Edits here are uploaded like any other play, and clamped like it. */
-    __pf?: { store: StoreT; sync: Sync; ui: Ui; scene: () => FarmScene | null };
+    __pf?: { store: StoreT; sync: Sync; ui: Ui; scene: () => FarmScene | null; game: () => typeof minigame.current };
   }
 }
 
@@ -61,7 +62,7 @@ async function boot(): Promise<void> {
     history.replaceState(null, '', '/');
   }
 
-  window.__pf = { store, sync, ui, scene };
+  window.__pf = { store, sync, ui, scene, game: () => minigame.current };
 }
 
 void boot();

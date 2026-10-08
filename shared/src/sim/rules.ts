@@ -77,6 +77,30 @@ export function unlocksAt(lvl: number): string[] {
   return out;
 }
 
+/** Coins per second the farm makes at base prices with every field on its best crop. */
+export function incomeRate(s: FarmState): number {
+  const crops = unlockedCrops(s);
+  const field = Math.max(...crops.map((c) => CROPS[c].sellPrice / (growMs(s, c) / 1000)));
+  let rate = field * s.fields.length;
+  for (const a of ANIMAL_IDS) rate += (s.animals[a].count * GOODS[ANIMALS[a].good].sellPrice) / ANIMALS[a].periodSec;
+  return rate;
+}
+
+/**
+ * Coins and XP for a minigame result. A par score pays about a minute and a half of farm
+ * income (at least 30 coins) and twice the XP of an order; better scores pay up to 1.5x,
+ * and any play pays at least a tenth of that.
+ */
+export function minigameReward(s: FarmState, score: number, par: number, mult = 1): { coins: number; xp: number } {
+  // Trying always earns a little, so a rough game still feels worth it for the kid.
+  const q = Math.max(0.1, Math.min(1.5, score / par)) * mult;
+  const lvl = level(s);
+  return {
+    coins: Math.round(q * Math.max(30, 90 * incomeRate(s))),
+    xp: Math.round(q * 2 * ECONOMY.orders.xpBase * Math.pow(ECONOMY.orders.xpGrowth, lvl - 1)),
+  };
+}
+
 /** Items the open orders still need, so the mill doesn't sell them. */
 export function orderNeeds(s: FarmState, item: ItemId): number {
   let n = 0;

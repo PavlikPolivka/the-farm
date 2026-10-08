@@ -12,7 +12,8 @@
     "barn": "Barn",
     "orders": "Orders",
     "settings": "Settings",
-    "boards": "Boards"
+    "boards": "Boards",
+    "games": "Games"
   },
   "common": {
     "close": "Close",
@@ -186,7 +187,8 @@
   },
   "family": {
     "title": "Family",
-    "login": "Log in to play with the family"
+    "login": "Log in to play with the family",
+    "crown": "Won yesterday's challenge"
   },
   "boards": {
     "title": "Boards",
@@ -217,5 +219,60 @@
     "offline": "Offline. The farm is saved on this phone and will sync later.",
     "loaded": "Loaded your farm from the server.",
     "adjusted": "The farm server fixed your farm a little."
+  },
+  "games": {
+    "pexeso": {
+      "name": "Pexeso",
+      "how": "Find the pairs. Tap two cards; if they match, they stay up."
+    },
+    "pipes": {
+      "name": "Water Pipes",
+      "how": "Tap pipes to turn them. Get water from the well to the field."
+    },
+    "merge": {
+      "name": "Crop Merge",
+      "how": "Swipe. Two of the same grow into something bigger."
+    },
+    "rush": {
+      "name": "Harvest Rush",
+      "how": "Tap ripe crops (they sparkle). Don't tap weeds or little sprouts!"
+    },
+    "eggs": {
+      "name": "Egg Sort",
+      "how": "Tap a basket, then another, to move the top egg. Put each kind of egg in its own basket."
+    }
+  },
+  "gamesSheet": {
+    "title": "Games",
+    "daily": "Today's challenge",
+    "dailyOpen": "Same board for the whole family. Only your first try counts.",
+    "dailyStarted": "You've already played today's challenge.",
+    "dailyDone": "Your score: {score} · place {rank} of {players}",
+    "crown": "{name} won yesterday and wears the crown",
+    "loginFirst": "Log in to play the challenge and earn rewards.",
+    "play": "Play",
+    "practice": "Practice",
+    "rewardsLeft": "{count, plural, one {# reward left today} other {# rewards left today}}"
+  },
+  "play": {
+    "start": "Start",
+    "ranked": "This is your ranked try.",
+    "quit": "End game",
+    "quitConfirm": "End?",
+    "saving": "Saving…",
+    "done": "Well done!",
+    "timeUp": "Time's up!",
+    "score": "Score: {score}",
+    "best": "Best: {best}",
+    "newBest": "New best!",
+    "rank": "Place {rank} today",
+    "noRewards": "No more rewards today – just for fun now.",
+    "practice": {
+      "login": "Practice: log in to earn rewards.",
+      "offline": "Practice: no connection, so no reward this time.",
+      "error": "Practice: the farm server didn't accept this game."
+    },
+    "again": "Play again",
+    "close": "Done"
   }
 }

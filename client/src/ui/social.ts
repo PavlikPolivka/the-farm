@@ -34,8 +34,8 @@ export class FamilyBar {
     private me: () => Me | null,
     private open: () => void,
     private login: () => void,
+    private settings: () => void,
   ) {
-    this.el.addEventListener('click', () => (this.me() ? this.open() : this.login()));
     this.render();
   }
 
@@ -55,18 +55,21 @@ export class FamilyBar {
 
   render(): void {
     clear(this.el);
+    const chips = h('div', { class: 'chips' });
+    const gear = h('button', { class: 'chip gear', data: { open: 'settings' }, 'aria-label': t('settings.title'), on: { click: () => this.settings() } }, sprite('gear', 2));
+    this.el.append(chips, gear);
     const me = this.me();
     if (!me) {
-      this.el.append(h('button', { class: 'chip login', data: { family: 'login' } }, sprite('farmhand', 1), t('family.login')));
+      chips.append(h('button', { class: 'chip login', data: { family: 'login' }, on: { click: () => this.login() } }, sprite('farmhand', 1), t('family.login')));
       return;
     }
-    const members = this.members.length ? this.members : [{ id: me.id, name: me.displayName, level: 0, lifetimeCoins: 0, weekCoins: 0, lastSeen: null }];
+    const members = this.members.length ? this.members : [{ id: me.id, name: me.displayName, level: 0, lifetimeCoins: 0, weekCoins: 0, lastSeen: null, crown: false }];
     for (const m of members) {
-      this.el.append(
+      chips.append(
         h(
           'button',
-          { class: m.id === me.id ? 'chip me' : 'chip', data: { member: String(m.id) } },
-          avatar(m),
+          { class: m.id === me.id ? 'chip me' : 'chip', data: { member: String(m.id) }, on: { click: () => this.open() } },
+          h('span', { class: 'avatar-wrap' }, avatar(m), m.crown ? sprite('crown', 1, t('family.crown')) : null),
           h('span', { class: 'chip-name' }, firstName(m.name)),
           m.level ? h('span', { class: 'chip-level' }, sprite('star', 1), String(m.level)) : null,
         ),
@@ -145,7 +148,7 @@ export function boardsSheet(ctx: { me(): Me | null; login(): void }): Sheet {
       return;
     }
     for (const section of data.sections) {
-      if (section.game) list.append(h('h3', { class: 'board-game' }, t(`games.${section.game}`, { defaultValue: section.game })));
+      if (section.game) list.append(h('h3', { class: 'board-game' }, t(`games.${section.game}.name`, { defaultValue: section.game })));
       list.append(
         h(
           'ol',
