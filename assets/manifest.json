@@ -1,0 +1,320 @@
+[
+  {
+    "file": "sprites/barn-icon.png",
+    "source": "scripts/assets/generated.ts",
+    "pack": "Pixel Farm (generated)",
+    "license": "CC0-1.0"
+  },
+  {
+    "file": "sprites/beehive.png",
+    "source": "https://kenney.nl/assets/tiny-town",
+    "pack": "Kenney — Tiny Town (tile 94)",
+    "license": "CC0-1.0"
+  },
+  {
+    "file": "sprites/bush.png",
+    "source": "https://kenney.nl/assets/tiny-town",
+    "pack": "Kenney — Tiny Town (tile 5)",
+    "license": "CC0-1.0"
+  },
+  {
+    "file": "sprites/cabbage-1.png",
+    "source": "https://kenney.nl/assets/tiny-farm",
+    "pack": "Kenney — Tiny Farm (tile 52)",
+    "license": "CC0-1.0"
+  },
+  {
+    "file": "sprites/cabbage-2.png",
+    "source": "https://kenney.nl/assets/tiny-farm",
+    "pack": "Kenney — Tiny Farm (tile 53)",
+    "license": "CC0-1.0"
+  },
+  {
+    "file": "sprites/cabbage-3.png",
+    "source": "https://kenney.nl/assets/tiny-farm",
+    "pack": "Kenney — Tiny Farm (tile 54)",
+    "license": "CC0-1.0"
+  },
+  {
+    "file": "sprites/cabbage.png",
+    "source": "https://kenney.nl/assets/tiny-farm",
+    "pack": "Kenney — Tiny Farm (tile 56)",
+    "license": "CC0-1.0"
+  },
+  {
+    "file": "sprites/carrot-1.png",
+    "source": "https://kenney.nl/assets/tiny-farm",
+    "pack": "Kenney — Tiny Farm (tile 4)",
+    "license": "CC0-1.0"
+  },
+  {
+    "file": "sprites/carrot-2.png",
+    "source": "https://kenney.nl/assets/tiny-farm",
+    "pack": "Kenney — Tiny Farm (tile 5)",
+    "license": "CC0-1.0"
+  },
+  {
+    "file": "sprites/carrot-3.png",
+    "source": "https://kenney.nl/assets/tiny-farm",
+    "pack": "Kenney — Tiny Farm (tile 6)",
+    "license": "CC0-1.0"
+  },
+  {
+    "file": "sprites/carrot.png",
+    "source": "https://kenney.nl/assets/tiny-farm",
+    "pack": "Kenney — Tiny Farm (tile 8)",
+    "license": "CC0-1.0"
+  },
+  {
+    "file": "sprites/chicken.png",
+    "source": "https://kenney.nl/assets/tiny-farm",
+    "pack": "Kenney — Tiny Farm (tile 122)",
+    "license": "CC0-1.0"
+  },
+  {
+    "file": "sprites/coin.png",
+    "source": "https://kenney.nl/assets/tiny-town",
+    "pack": "Kenney — Tiny Town (tile 93)",
+    "license": "CC0-1.0"
+  },
+  {
+    "file": "sprites/corn-1.png",
+    "source": "https://kenney.nl/assets/tiny-farm",
+    "pack": "Kenney — Tiny Farm (tile 28)",
+    "license": "CC0-1.0"
+  },
+  {
+    "file": "sprites/corn-2.png",
+    "source": "https://kenney.nl/assets/tiny-farm",
+    "pack": "Kenney — Tiny Farm (tile 29)",
+    "license": "CC0-1.0"
+  },
+  {
+    "file": "sprites/corn-3.png",
+    "source": "https://kenney.nl/assets/tiny-farm",
+    "pack": "Kenney — Tiny Farm (tile 30)",
+    "license": "CC0-1.0"
+  },
+  {
+    "file": "sprites/corn.png",
+    "source": "https://kenney.nl/assets/tiny-farm",
+    "pack": "Kenney — Tiny Farm (tile 32)",
+    "license": "CC0-1.0"
+  },
+  {
+    "file": "sprites/cow.png",
+    "source": "https://kenney.nl/assets/tiny-farm",
+    "pack": "Kenney — Tiny Farm (tile 121)",
+    "license": "CC0-1.0"
+  },
+  {
+    "file": "sprites/egg.png",
+    "source": "https://kenney.nl/assets/tiny-farm",
+    "pack": "Kenney — Tiny Farm (tile 125)",
+    "license": "CC0-1.0"
+  },
+  {
+    "file": "sprites/farmhand.png",
+    "source": "https://kenney.nl/assets/tiny-farm",
+    "pack": "Kenney — Tiny Farm (tile 108)",
+    "license": "CC0-1.0"
+  },
+  {
+    "file": "sprites/fence-l.png",
+    "source": "https://kenney.nl/assets/tiny-town",
+    "pack": "Kenney — Tiny Town (tile 80)",
+    "license": "CC0-1.0"
+  },
+  {
+    "file": "sprites/fence-m.png",
+    "source": "https://kenney.nl/assets/tiny-town",
+    "pack": "Kenney — Tiny Town (tile 81)",
+    "license": "CC0-1.0"
+  },
+  {
+    "file": "sprites/fence-r.png",
+    "source": "https://kenney.nl/assets/tiny-town",
+    "pack": "Kenney — Tiny Town (tile 82)",
+    "license": "CC0-1.0"
+  },
+  {
+    "file": "sprites/gear.png",
+    "source": "scripts/assets/generated.ts",
+    "pack": "Pixel Farm (generated)",
+    "license": "CC0-1.0"
+  },
+  {
+    "file": "sprites/grass-flower.png",
+    "source": "https://kenney.nl/assets/tiny-town",
+    "pack": "Kenney — Tiny Town (tile 2)",
+    "license": "CC0-1.0"
+  },
+  {
+    "file": "sprites/grass-tuft.png",
+    "source": "https://kenney.nl/assets/tiny-town",
+    "pack": "Kenney — Tiny Town (tile 1)",
+    "license": "CC0-1.0"
+  },
+  {
+    "file": "sprites/grass.png",
+    "source": "https://kenney.nl/assets/tiny-town",
+    "pack": "Kenney — Tiny Town (tile 0)",
+    "license": "CC0-1.0"
+  },
+  {
+    "file": "sprites/hand.png",
+    "source": "scripts/assets/generated.ts",
+    "pack": "Pixel Farm (generated)",
+    "license": "CC0-1.0"
+  },
+  {
+    "file": "sprites/hay.png",
+    "source": "https://kenney.nl/assets/tiny-farm",
+    "pack": "Kenney — Tiny Farm (tile 96)",
+    "license": "CC0-1.0"
+  },
+  {
+    "file": "sprites/honey.png",
+    "source": "scripts/assets/generated.ts",
+    "pack": "Pixel Farm (generated)",
+    "license": "CC0-1.0"
+  },
+  {
+    "file": "sprites/lock.png",
+    "source": "scripts/assets/generated.ts",
+    "pack": "Pixel Farm (generated)",
+    "license": "CC0-1.0"
+  },
+  {
+    "file": "sprites/milk.png",
+    "source": "https://kenney.nl/assets/tiny-farm",
+    "pack": "Kenney — Tiny Farm (tile 123)",
+    "license": "CC0-1.0"
+  },
+  {
+    "file": "sprites/scarecrow.png",
+    "source": "scripts/assets/generated.ts",
+    "pack": "Pixel Farm (generated)",
+    "license": "CC0-1.0"
+  },
+  {
+    "file": "sprites/sheep.png",
+    "source": "https://kenney.nl/assets/tiny-farm",
+    "pack": "Kenney — Tiny Farm (tile 120)",
+    "license": "CC0-1.0"
+  },
+  {
+    "file": "sprites/sign.png",
+    "source": "https://kenney.nl/assets/tiny-town",
+    "pack": "Kenney — Tiny Town (tile 83)",
+    "license": "CC0-1.0"
+  },
+  {
+    "file": "sprites/soil.png",
+    "source": "https://kenney.nl/assets/tiny-farm",
+    "pack": "Kenney — Tiny Farm (tile 0)",
+    "license": "CC0-1.0"
+  },
+  {
+    "file": "sprites/sparkle.png",
+    "source": "scripts/assets/generated.ts",
+    "pack": "Pixel Farm (generated)",
+    "license": "CC0-1.0"
+  },
+  {
+    "file": "sprites/sprinkler.png",
+    "source": "scripts/assets/generated.ts",
+    "pack": "Pixel Farm (generated)",
+    "license": "CC0-1.0"
+  },
+  {
+    "file": "sprites/star.png",
+    "source": "scripts/assets/generated.ts",
+    "pack": "Pixel Farm (generated)",
+    "license": "CC0-1.0"
+  },
+  {
+    "file": "sprites/tomato-1.png",
+    "source": "https://kenney.nl/assets/tiny-farm",
+    "pack": "Kenney — Tiny Farm (tile 40)",
+    "license": "CC0-1.0"
+  },
+  {
+    "file": "sprites/tomato-2.png",
+    "source": "https://kenney.nl/assets/tiny-farm",
+    "pack": "Kenney — Tiny Farm (tile 41)",
+    "license": "CC0-1.0"
+  },
+  {
+    "file": "sprites/tomato-3.png",
+    "source": "https://kenney.nl/assets/tiny-farm",
+    "pack": "Kenney — Tiny Farm (tile 42)",
+    "license": "CC0-1.0"
+  },
+  {
+    "file": "sprites/tomato.png",
+    "source": "https://kenney.nl/assets/tiny-farm",
+    "pack": "Kenney — Tiny Farm (tile 44)",
+    "license": "CC0-1.0"
+  },
+  {
+    "file": "sprites/tree-orange.png",
+    "source": "https://kenney.nl/assets/tiny-town",
+    "pack": "Kenney — Tiny Town (tile 3)",
+    "license": "CC0-1.0"
+  },
+  {
+    "file": "sprites/trough.png",
+    "source": "https://kenney.nl/assets/tiny-farm",
+    "pack": "Kenney — Tiny Farm (tile 113)",
+    "license": "CC0-1.0"
+  },
+  {
+    "file": "sprites/well.png",
+    "source": "https://kenney.nl/assets/tiny-town",
+    "pack": "Kenney — Tiny Town (tile 104)",
+    "license": "CC0-1.0"
+  },
+  {
+    "file": "sprites/wheat-1.png",
+    "source": "https://kenney.nl/assets/tiny-farm",
+    "pack": "Kenney — Tiny Farm (tile 64)",
+    "license": "CC0-1.0"
+  },
+  {
+    "file": "sprites/wheat-2.png",
+    "source": "https://kenney.nl/assets/tiny-farm",
+    "pack": "Kenney — Tiny Farm (tile 65)",
+    "license": "CC0-1.0"
+  },
+  {
+    "file": "sprites/wheat-3.png",
+    "source": "https://kenney.nl/assets/tiny-farm",
+    "pack": "Kenney — Tiny Farm (tile 66)",
+    "license": "CC0-1.0"
+  },
+  {
+    "file": "sprites/wheat.png",
+    "source": "https://kenney.nl/assets/tiny-farm",
+    "pack": "Kenney — Tiny Farm (tile 68)",
+    "license": "CC0-1.0"
+  },
+  {
+    "file": "sprites/windmill-sails.png",
+    "source": "scripts/assets/generated.ts",
+    "pack": "Pixel Farm (generated)",
+    "license": "CC0-1.0"
+  },
+  {
+    "file": "sprites/windmill.png",
+    "source": "scripts/assets/generated.ts",
+    "pack": "Pixel Farm (generated)",
+    "license": "CC0-1.0"
+  },
+  {
+    "file": "sprites/wool.png",
+    "source": "scripts/assets/generated.ts",
+    "pack": "Pixel Farm (generated)",
+    "license": "CC0-1.0"
+  }
+]

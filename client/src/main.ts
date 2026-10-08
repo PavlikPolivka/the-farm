@@ -1,116 +1,65 @@
 import Phaser from 'phaser';
 import { registerSW } from 'virtual:pwa-register';
-import { APP_VERSION, type Me } from '@pixel-farm/shared';
+import type { Store as StoreT } from './game/store.js';
+import { Store } from './game/store.js';
+import { initI18n, t } from './i18n/index.js';
 import { FarmScene } from './scenes/FarmScene.js';
-import { applyStaticStrings, setLocale, t } from './i18n.js';
-import { enablePush, isStandalone, pushState, sendTestPush } from './push.js';
+import { toast } from './ui/effects.js';
+import { Ui } from './ui/index.js';
+import { prefersReducedMotion, setReducedMotion } from './ui/prefs.js';
 import './style.css';
+
+declare global {
+  interface Window {
+    /** Debug / e2e handle. Only touches this device's local farm. */
+    __pf?: { store: StoreT; ui: Ui; scene: () => FarmScene | null };
+  }
+}
 
 registerSW({ immediate: true });
 
-new Phaser.Game({
-  type: Phaser.AUTO,
-  parent: 'game',
-  pixelArt: true,
-  backgroundColor: '#38b764',
-  scale: { mode: Phaser.Scale.RESIZE, width: '100%', height: '100%' },
-  scene: [FarmScene],
-});
+async function boot(): Promise<void> {
+  await initI18n();
+  setReducedMotion(prefersReducedMotion());
+  const { store, awayMs, away } = await Store.open();
+  const ui = new Ui(store);
 
-const $ = <T extends HTMLElement>(id: string) => document.getElementById(id) as T;
-const status = $('status');
-const hint = $('hint');
-const buttons = {
-  login: $<HTMLButtonElement>('login'),
-  notify: $<HTMLButtonElement>('notify'),
-  testpush: $<HTMLButtonElement>('testpush'),
-  logout: $<HTMLButtonElement>('logout'),
-};
+  const game = new Phaser.Game({
+    type: Phaser.AUTO,
+    parent: 'game',
+    pixelArt: true,
+    backgroundColor: '#84c669',
+    scale: { mode: Phaser.Scale.RESIZE, width: '100%', height: '100%' },
+    banner: false,
+  });
+  game.scene.add('farm', FarmScene, true, {
+    store,
+    callbacks: {
+      onField: (i: number, at: { x: number; y: number }) => ui.field(i, at),
+      onWindmill: (at: { x: number; y: number }) => ui.windmill(at),
+      onBarn: () => ui.open('barn'),
+      onPen: () => ui.open('shop'),
+      onLand: () => ui.open('shop'),
+      // Keep the boot screen up until the farm can take taps.
+      onReady: (farm: FarmScene) => {
+        ui.scene = farm;
+        document.getElementById('boot')?.remove();
+      },
+    },
+  });
+  const scene = () => (game.scene.getScene('farm') as FarmScene | null) ?? null;
 
-$('version').textContent = `v${APP_VERSION} · ${isStandalone() ? 'app' : 'browser'}`;
+  store.start();
+  ui.welcome(awayMs, away);
+  void ui.refreshMe();
 
-function showLoginError(): void {
-  const reason = new URLSearchParams(location.search).get('login');
-  if (reason === 'forbidden') hint.textContent = t('loginForbidden');
-  else if (reason) hint.textContent = t('loginFailed');
-  if (reason) history.replaceState(null, '', '/');
-}
-
-function renderPush(): void {
-  const state = pushState();
-  buttons.notify.hidden = state === 'granted' || state === 'unsupported';
-  buttons.testpush.hidden = state !== 'granted';
-  if (state === 'needs-install') {
-    buttons.notify.hidden = true;
-    hint.textContent = t('installHint');
-  } else if (state === 'unsupported') hint.textContent = t('pushUnsupported');
-  else if (state === 'denied') hint.textContent = t('pushDenied');
-}
-
-async function refresh(): Promise<void> {
-  applyStaticStrings();
-  let res: Response;
-  try {
-    res = await fetch('/api/me', { cache: 'no-store' });
-  } catch {
-    status.textContent = t('offline');
-    return;
+  const login = new URLSearchParams(location.search).get('login');
+  if (login) {
+    toast(t(login === 'forbidden' ? 'login.forbidden' : login === 'expired' ? 'login.expired' : 'login.failed'), 'lock', 5000);
+    history.replaceState(null, '', '/');
   }
-  if (res.status === 401) {
-    status.textContent = t('loggedOut');
-    buttons.login.hidden = false;
-    for (const b of [buttons.notify, buttons.testpush, buttons.logout]) b.hidden = true;
-    return;
-  }
-  const me = (await res.json()) as Me;
-  setLocale(me.locale);
-  applyStaticStrings();
-  status.textContent = t('hello', { name: me.displayName });
-  buttons.login.hidden = true;
-  buttons.logout.hidden = false;
-  renderPush();
+
+  window.__pf = { store, ui, scene };
 }
 
-async function withBusy(btn: HTMLButtonElement, fn: () => Promise<void>): Promise<void> {
-  btn.disabled = true;
-  try {
-    await fn();
-  } catch (err) {
-    hint.textContent = t('error', { msg: err instanceof Error ? err.message : String(err) });
-  } finally {
-    btn.disabled = false;
-  }
-}
-
-// Top-level navigation, not fetch: the OIDC redirect chain must run in the page itself.
-buttons.login.addEventListener('click', () => location.assign('/auth/login'));
-
-buttons.notify.addEventListener('click', () =>
-  withBusy(buttons.notify, async () => {
-    const state = await enablePush();
-    if (state === 'granted') hint.textContent = t('pushEnabled');
-    renderPush();
-  }),
-);
-
-buttons.testpush.addEventListener('click', () =>
-  withBusy(buttons.testpush, async () => {
-    const n = await sendTestPush();
-    hint.textContent = n > 0 ? t('pushSent', { n }) : t('pushNone');
-  }),
-);
-
-buttons.logout.addEventListener('click', () =>
-  withBusy(buttons.logout, async () => {
-    await fetch('/auth/logout', { method: 'POST' });
-    hint.textContent = '';
-    await refresh();
-  }),
-);
-
-document.addEventListener('visibilitychange', () => {
-  if (document.visibilityState === 'visible') void refresh();
-});
-
-showLoginError();
-void refresh();
+void boot();

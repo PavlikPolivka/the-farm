@@ -1,5 +1,19 @@
 {
   "extends": "../tsconfig.base.json",
-  "compilerOptions": { "outDir": "../node_modules/.tsc/scripts", "rootDir": ".", "types": ["node"], "emitDeclarationOnly": true },
-  "include": ["**/*.ts"]
+  "compilerOptions": {
+    "outDir": "../node_modules/.tsc/scripts",
+    "rootDir": ".",
+    "types": [
+      "node"
+    ],
+    "emitDeclarationOnly": true
+  },
+  "include": [
+    "**/*.ts"
+  ],
+  "references": [
+    {
+      "path": "../shared"
+    }
+  ]
 }

@@ -1,0 +1,186 @@
+{
+  "app": {
+    "title": "Pixel Farm"
+  },
+  "hud": {
+    "level": "Level {level}",
+    "combo": "Combo ×{mult}",
+    "seed": "Seed"
+  },
+  "bar": {
+    "shop": "Shop",
+    "barn": "Barn",
+    "orders": "Orders",
+    "settings": "Settings"
+  },
+  "common": {
+    "close": "Close",
+    "max": "Max",
+    "locked": "From level {level}",
+    "owned": "You have {count}",
+    "levelOf": "Level {level}"
+  },
+  "items": {
+    "wheat": {
+      "name": "Wheat",
+      "count": "{count, plural, one {# wheat} other {# wheat}}"
+    },
+    "carrot": {
+      "name": "Carrot",
+      "count": "{count, plural, one {# carrot} other {# carrots}}"
+    },
+    "corn": {
+      "name": "Corn",
+      "count": "{count, plural, one {# corn} other {# corn}}"
+    },
+    "tomato": {
+      "name": "Tomato",
+      "count": "{count, plural, one {# tomato} other {# tomatoes}}"
+    },
+    "cabbage": {
+      "name": "Cabbage",
+      "count": "{count, plural, one {# cabbage} other {# cabbages}}"
+    },
+    "egg": {
+      "name": "Egg",
+      "count": "{count, plural, one {# egg} other {# eggs}}"
+    },
+    "wool": {
+      "name": "Wool",
+      "count": "{count, plural, one {# ball of wool} other {# balls of wool}}"
+    },
+    "milk": {
+      "name": "Milk",
+      "count": "{count, plural, one {# bottle of milk} other {# bottles of milk}}"
+    },
+    "honey": {
+      "name": "Honey",
+      "count": "{count, plural, one {# jar of honey} other {# jars of honey}}"
+    }
+  },
+  "animals": {
+    "chicken": {
+      "name": "Chicken",
+      "desc": "Eats wheat, lays eggs."
+    },
+    "sheep": {
+      "name": "Sheep",
+      "desc": "Eats carrots, gives wool."
+    },
+    "cow": {
+      "name": "Cow",
+      "desc": "Eats corn, gives milk."
+    },
+    "bees": {
+      "name": "Beehive",
+      "desc": "Makes honey all by itself."
+    }
+  },
+  "helpers": {
+    "farmhand": {
+      "name": "Farmhand",
+      "desc": "Plants and harvests one field for you."
+    },
+    "sprinkler": {
+      "name": "Sprinkler",
+      "desc": "Crops grow 20 % faster."
+    },
+    "scarecrow": {
+      "name": "Scarecrow",
+      "desc": "Sometimes an extra crop at harvest."
+    },
+    "mill": {
+      "name": "Mill",
+      "desc": "Sells extra stuff for you. Better prices."
+    }
+  },
+  "shop": {
+    "title": "Shop",
+    "tabs": {
+      "farm": "Farm",
+      "animals": "Animals",
+      "helpers": "Helpers"
+    },
+    "field": {
+      "name": "New field",
+      "desc": "One more field to plant."
+    },
+    "land": {
+      "name": "More land",
+      "desc": "Room for 4 more fields."
+    },
+    "tap": {
+      "name": "Windmill",
+      "desc": "Each tap gives {power} → {next} coins."
+    },
+    "fieldsFull": "Buy more land first"
+  },
+  "barn": {
+    "title": "Barn",
+    "empty": "The barn is empty. Harvest something!",
+    "sellOne": "Sell 1",
+    "sellAll": "Sell all",
+    "each": "{price} each"
+  },
+  "orders": {
+    "title": "Orders",
+    "deliver": "Deliver",
+    "reward": "Reward",
+    "intro": "Villagers need these. New orders come right away."
+  },
+  "seeds": {
+    "title": "What to plant?",
+    "grows": "Grows {time}",
+    "auto": "Farmhand plants"
+  },
+  "settings": {
+    "title": "Settings",
+    "language": "Language",
+    "motion": "Less movement",
+    "account": "Account",
+    "loggedInAs": "Account: {name}",
+    "notLoggedIn": "Not logged in. The farm is saved on this phone.",
+    "login": "Log in",
+    "logout": "Log out",
+    "notifications": "Notifications",
+    "enableNotifications": "Turn on notifications",
+    "testPush": "Send a test",
+    "pushOn": "Notifications are on",
+    "pushInstall": "On iPhone: Share → Add to Home Screen, then open from there.",
+    "pushUnsupported": "This browser can't show notifications.",
+    "pushDenied": "Notifications are blocked in the phone settings.",
+    "pushSent": "Sent. It should arrive in a moment.",
+    "tutorial": "Show the guide again",
+    "credits": "Credits",
+    "creditsText": "Art: Kenney.nl (CC0). Extra pixels drawn in the same palette."
+  },
+  "tutorial": {
+    "skip": "Skip",
+    "tap": "Tap the windmill to earn coins.",
+    "plant": "Tap an empty field to plant wheat.",
+    "harvest": "Wait for the sparkle, then tap to harvest.",
+    "sell": "Open the barn and sell your wheat.",
+    "buy": "Open the shop and buy something.",
+    "order": "Open orders. Deliver one when you have the items."
+  },
+  "toast": {
+    "levelUp": "Level {level}!",
+    "unlocked": "New: {list}",
+    "coins": "Not enough coins",
+    "locked": "Not yet – level up first",
+    "items": "Not enough in the barn",
+    "land": "More land",
+    "saved": "Saved"
+  },
+  "welcome": {
+    "title": "Welcome back!",
+    "away": "In the last {time} your farm made:",
+    "coins": "{amount} coins",
+    "ok": "Great!"
+  },
+  "login": {
+    "expired": "Login took too long. Try again.",
+    "failed": "Login failed. Try again.",
+    "forbidden": "This account can't play yet. Ask Pavel."
+  }
+}

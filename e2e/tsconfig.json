@@ -5,22 +5,17 @@
     "moduleResolution": "Bundler",
     "lib": [
       "ES2022",
-      "DOM",
-      "DOM.Iterable"
+      "DOM"
     ],
     "types": [
-      "vite/client",
-      "vite-plugin-pwa/client"
+      "node"
     ],
     "emitDeclarationOnly": true,
-    "outDir": "../node_modules/.tsc/client-app",
-    "tsBuildInfoFile": "../node_modules/.tsc/client-app.tsbuildinfo",
-    "resolveJsonModule": true
+    "outDir": "../node_modules/.tsc/e2e",
+    "rootDir": "."
   },
   "include": [
-    "src",
-    "src/**/*.json",
-    "vite.config.ts"
+    "*.ts"
   ],
   "references": [
     {

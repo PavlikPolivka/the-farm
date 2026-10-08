@@ -1,9 +1,20 @@
 {
   "files": [],
   "references": [
-    { "path": "shared" },
-    { "path": "server" },
-    { "path": "client" },
-    { "path": "scripts" }
+    {
+      "path": "shared"
+    },
+    {
+      "path": "server"
+    },
+    {
+      "path": "client"
+    },
+    {
+      "path": "scripts"
+    },
+    {
+      "path": "e2e"
+    }
   ]
 }

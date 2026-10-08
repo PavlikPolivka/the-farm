@@ -1,3 +1,5 @@
+import { resolve } from 'node:path';
+
 export interface Config {
   port: number;
   host: string;
@@ -38,7 +40,7 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): Config {
     publicUrl: (env.PUBLIC_URL ?? 'http://localhost:3000').replace(/\/$/, ''),
     dbPath: env.DB_PATH ?? './data/farm.db',
     sessionSecret,
-    staticDir: env.STATIC_DIR ?? null,
+    staticDir: env.STATIC_DIR ? resolve(env.STATIC_DIR) : null,
     oidc,
     vapid,
     playGroups: list(env.PLAY_GROUPS, ['pixel-farm']),

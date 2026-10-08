@@ -6,6 +6,10 @@
     ".": {
       "types": "./dist/index.d.ts",
       "default": "./dist/index.js"
+    },
+    "./bot": {
+      "types": "./dist/sim/bot.d.ts",
+      "default": "./dist/sim/bot.js"
     }
   },
   "scripts": {

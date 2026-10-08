@@ -1,0 +1,186 @@
+{
+  "app": {
+    "title": "Pixelová farma"
+  },
+  "hud": {
+    "level": "Úroveň {level}",
+    "combo": "Kombo ×{mult}",
+    "seed": "Semínko"
+  },
+  "bar": {
+    "shop": "Obchod",
+    "barn": "Stodola",
+    "orders": "Zakázky",
+    "settings": "Nastavení"
+  },
+  "common": {
+    "close": "Zavřít",
+    "max": "Hotovo",
+    "locked": "Od úrovně {level}",
+    "owned": "Máš {count}",
+    "levelOf": "Úroveň {level}"
+  },
+  "items": {
+    "wheat": {
+      "name": "Pšenice",
+      "count": "{count, plural, one {# snop pšenice} few {# snopy pšenice} other {# snopů pšenice}}"
+    },
+    "carrot": {
+      "name": "Mrkev",
+      "count": "{count, plural, one {# mrkev} few {# mrkve} other {# mrkví}}"
+    },
+    "corn": {
+      "name": "Kukuřice",
+      "count": "{count, plural, one {# klas kukuřice} few {# klasy kukuřice} other {# klasů kukuřice}}"
+    },
+    "tomato": {
+      "name": "Rajče",
+      "count": "{count, plural, one {# rajče} few {# rajčata} other {# rajčat}}"
+    },
+    "cabbage": {
+      "name": "Zelí",
+      "count": "{count, plural, one {# hlávka zelí} few {# hlávky zelí} other {# hlávek zelí}}"
+    },
+    "egg": {
+      "name": "Vejce",
+      "count": "{count, plural, one {# vejce} few {# vejce} other {# vajec}}"
+    },
+    "wool": {
+      "name": "Vlna",
+      "count": "{count, plural, one {# klubko vlny} few {# klubka vlny} other {# klubek vlny}}"
+    },
+    "milk": {
+      "name": "Mléko",
+      "count": "{count, plural, one {# láhev mléka} few {# láhve mléka} other {# lahví mléka}}"
+    },
+    "honey": {
+      "name": "Med",
+      "count": "{count, plural, one {# sklenice medu} few {# sklenice medu} other {# sklenic medu}}"
+    }
+  },
+  "animals": {
+    "chicken": {
+      "name": "Slepice",
+      "desc": "Žere pšenici, snáší vejce."
+    },
+    "sheep": {
+      "name": "Ovce",
+      "desc": "Žere mrkev, dává vlnu."
+    },
+    "cow": {
+      "name": "Kráva",
+      "desc": "Žere kukuřici, dává mléko."
+    },
+    "bees": {
+      "name": "Úl",
+      "desc": "Včelky dělají med úplně samy."
+    }
+  },
+  "helpers": {
+    "farmhand": {
+      "name": "Pomocník",
+      "desc": "Zasadí a sklidí jedno pole za tebe."
+    },
+    "sprinkler": {
+      "name": "Zavlažovač",
+      "desc": "Plodiny rostou o 20 % rychleji."
+    },
+    "scarecrow": {
+      "name": "Strašák",
+      "desc": "Občas sklidíš něco navíc."
+    },
+    "mill": {
+      "name": "Mlýn",
+      "desc": "Prodává přebytky za tebe. Lepší ceny."
+    }
+  },
+  "shop": {
+    "title": "Obchod",
+    "tabs": {
+      "farm": "Farma",
+      "animals": "Zvířata",
+      "helpers": "Pomocníci"
+    },
+    "field": {
+      "name": "Nové pole",
+      "desc": "Další pole na sázení."
+    },
+    "land": {
+      "name": "Další pozemek",
+      "desc": "Místo pro 4 další pole."
+    },
+    "tap": {
+      "name": "Větrný mlýn",
+      "desc": "Každé ťuknutí dá {power} → {next} mincí."
+    },
+    "fieldsFull": "Nejdřív kup další pozemek"
+  },
+  "barn": {
+    "title": "Stodola",
+    "empty": "Stodola je prázdná. Něco skliď!",
+    "sellOne": "Prodat 1",
+    "sellAll": "Prodat vše",
+    "each": "{price} za kus"
+  },
+  "orders": {
+    "title": "Zakázky",
+    "deliver": "Doručit",
+    "reward": "Odměna",
+    "intro": "Tohle potřebují sousedé. Nové zakázky přijdou hned."
+  },
+  "seeds": {
+    "title": "Co zasadit?",
+    "grows": "Roste {time}",
+    "auto": "Pomocník sází"
+  },
+  "settings": {
+    "title": "Nastavení",
+    "language": "Jazyk",
+    "motion": "Méně pohybu",
+    "account": "Účet",
+    "loggedInAs": "Účet: {name}",
+    "notLoggedIn": "Nepřihlášeno. Farma se ukládá v tomhle telefonu.",
+    "login": "Přihlásit se",
+    "logout": "Odhlásit se",
+    "notifications": "Upozornění",
+    "enableNotifications": "Zapnout upozornění",
+    "testPush": "Poslat zkušební",
+    "pushOn": "Upozornění jsou zapnutá",
+    "pushInstall": "Na iPhonu: Sdílet → Přidat na plochu a otevři farmu odtud.",
+    "pushUnsupported": "Tento prohlížeč neumí upozornění.",
+    "pushDenied": "Upozornění jsou zablokovaná v nastavení telefonu.",
+    "pushSent": "Odesláno. Za chvilku dorazí.",
+    "tutorial": "Ukázat průvodce znovu",
+    "credits": "Poděkování",
+    "creditsText": "Grafika: Kenney.nl (CC0). Pár pixelů navíc ve stejných barvách."
+  },
+  "tutorial": {
+    "skip": "Přeskočit",
+    "tap": "Ťukni na větrný mlýn a získej mince.",
+    "plant": "Ťukni na prázdné pole a zasaď pšenici.",
+    "harvest": "Počkej, až se zatřpytí, a ťukni pro sklizeň.",
+    "sell": "Otevři stodolu a prodej pšenici.",
+    "buy": "Otevři obchod a něco si kup.",
+    "order": "Otevři zakázky. Doruč, až budeš mít, co chtějí."
+  },
+  "toast": {
+    "levelUp": "Úroveň {level}!",
+    "unlocked": "Nové: {list}",
+    "coins": "Málo mincí",
+    "locked": "Ještě ne – nejdřív vyšší úroveň",
+    "items": "Ve stodole toho není dost",
+    "land": "Další pozemek",
+    "saved": "Uloženo"
+  },
+  "welcome": {
+    "title": "Vítej zpátky!",
+    "away": "Za posledních {time} tvoje farma vydělala:",
+    "coins": "{amount} mincí",
+    "ok": "Super!"
+  },
+  "login": {
+    "expired": "Přihlášení trvalo moc dlouho. Zkus to znovu.",
+    "failed": "Přihlášení se nepovedlo. Zkus to znovu.",
+    "forbidden": "Tento účet zatím nemůže hrát. Zeptej se Pavla."
+  }
+}

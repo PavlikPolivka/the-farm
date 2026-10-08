@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no" />
-    <meta name="theme-color" content="#38b764" />
+    <meta name="theme-color" content="#84c669" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="default" />
@@ -14,16 +14,10 @@
     <title>Pixel Farm</title>
   </head>
   <body>
+    <div id="hud-slot"></div>
     <div id="game"></div>
-    <div id="panel">
-      <p id="status" aria-live="polite">…</p>
-      <button id="login" hidden><span aria-hidden="true">🔑</span> <span data-i18n="login"></span></button>
-      <button id="notify" hidden><span aria-hidden="true">🔔</span> <span data-i18n="enableNotifications"></span></button>
-      <button id="testpush" hidden><span aria-hidden="true">📨</span> <span data-i18n="testPush"></span></button>
-      <button id="logout" hidden class="secondary"><span aria-hidden="true">🚪</span> <span data-i18n="logout"></span></button>
-      <p id="hint"></p>
-      <p id="version"></p>
-    </div>
+    <div id="toasts" aria-live="polite"></div>
+    <div id="boot"><img src="/sprites/barn-icon.png" width="96" height="96" alt="" /></div>
     <script type="module" src="/src/main.ts"></script>
   </body>
 </html>
