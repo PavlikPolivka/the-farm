@@ -31,7 +31,7 @@ describe('parseSave', () => {
   it('drops unknown keys and rejects malformed saves', () => {
     const s = json(startGame(T0, 7)) as Record<string, unknown>;
     expect(parseSave({ ...s, extra: 'x' })).not.toHaveProperty('extra');
-    expect(() => parseSave({ ...s, v: 4 })).toThrow(/version/);
+    expect(() => parseSave({ ...s, v: 5 })).toThrow(/version/);
     expect(() => parseSave({ ...s, coins: -1 })).toThrow(/coins/);
     expect(() => parseSave({ ...s, coins: 'lots' })).toThrow(/coins/);
     expect(() => parseSave({ ...s, land: 99 })).toThrow(/land/);
@@ -47,6 +47,8 @@ describe('checkSave: legit play is never clamped', () => {
     ['casual', 2 * 86_400, 30],
     ['kid', 2 * 86_400, 30],
     ['casual', 3 * 86_400, 6 * 3600],
+    // Through the first move to new land (day 4–5) and into the second run.
+    ['casual', 6 * 86_400, 6 * 3600],
   ] as const) {
     it(`${profile}, ${until / 3600} h, sync every ${every} s`, () => {
       const verdicts = syncs(profile, until, every);
@@ -76,7 +78,8 @@ describe('checkSave: doctored saves', () => {
     const v = checkSave(prev, next, next.t);
     expect(v.ok && v.clamped).toContain('coins');
     if (!v.ok) return;
-    expect(v.state.lifetimeCoins).toBeLessThan(honest + 50_000);
+    // What's left is the allowance for 30 s of a perfect player plus crops that were nearly ripe.
+    expect(v.state.lifetimeCoins).toBeLessThan(honest + 100_000);
     expect(wealth(v.state)).toBeLessThan(wealth(next));
   });
 
@@ -138,7 +141,40 @@ describe('checkSave: doctored saves', () => {
     delete v1.lastRewardId;
     delete v1.stats.rewardCoins;
     delete v1.stats.rewardXp;
-    expect(parseSave(v1)).toMatchObject({ v: 3, lastRewardId: 0, stats: { rewardCoins: 0, rewardXp: 0, giftValueIn: 0, flowers: 0 } });
+    expect(parseSave(v1)).toMatchObject({ v: 4, lastRewardId: 0, stats: { rewardCoins: 0, rewardXp: 0, giftValueIn: 0, flowers: 0 } });
+  });
+
+  it('rejects Golden Seeds and perks the farm never earned', () => {
+    const { prev, next } = played();
+    const seeds = clone(next);
+    seeds.prestige = { level: 1, seedsEarned: 50 };
+    expect(checkSave(prev, seeds, seeds.t)).toMatchObject({ ok: false, reason: 'prestige' });
+    const perks = clone(next);
+    perks.perks.soil = 10;
+    expect(checkSave(prev, perks, perks.t)).toMatchObject({ ok: false, reason: 'perks' });
+  });
+
+  it('clamps minigame plays and prizes to what the server handed out', () => {
+    const { prev, next } = played();
+    next.stats.games = 40;
+    next.stats.plays.pexeso = 40;
+    next.stats.crowns = 3;
+    next.trophies = ['2026-01-05', '2026-01-12'];
+    const v = checkSave(prev, next, next.t, { coins: 0, xp: 0, plays: 2, crowns: 1, trophies: 0 });
+    expect(v.ok && v.clamped).toEqual(expect.arrayContaining(['plays', 'crowns', 'trophies']));
+    if (!v.ok) return;
+    expect(v.state.stats.games).toBe(2);
+    expect(v.state.stats.plays.pexeso).toBe(2);
+    expect(v.state.stats.crowns).toBe(1);
+    expect(v.state.trophies).toEqual([]);
+  });
+
+  it('reads v3 saves from before prestige and collections', () => {
+    const v3 = json(startGame(T0, 3)) as Record<string, unknown> & { stats: Record<string, unknown> };
+    v3.v = 3;
+    for (const k of ['lastPrizeId', 'seeds', 'prestige', 'perks', 'found', 'skins', 'trophies']) delete v3[k];
+    for (const k of ['giftsSent', 'games', 'plays', 'crowns', 'bestLevel', 'bestFields', 'bestFarmhands']) delete v3.stats[k];
+    expect(parseSave(v3)).toMatchObject({ v: 4, seeds: 0, prestige: { level: 0, seedsEarned: 0 }, found: { animals: [], decor: [] }, stats: { games: 0, bestFields: 2 } });
   });
 
   it('assetSpend matches what the engine charged', () => {

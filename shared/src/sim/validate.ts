@@ -28,8 +28,12 @@ import {
   type CropId,
   type ItemId,
 } from '../config/economy.js';
-import { comboMult, growMs, isCrop, levelOf, tapPower, unlockedCrops } from './rules.js';
-import { TUTORIAL_DONE, clone, newGame, type FarmState, type Field, type Order } from './state.js';
+import { PERKS, PERK_IDS, PRESTIGE, SKINS, SKIN_SLOTS, BREED_IDS, DECOR_IDS } from '../config/progress.js';
+import { GAME_IDS } from '../games/engine.js';
+import { ORDER_POOL } from './engine.js';
+import { perkSpend } from './progress.js';
+import { animalPeriodMs, comboMult, growMs, isCrop, levelOf, tapPower, unlockedCrops } from './rules.js';
+import { TUTORIAL_DONE, clone, migrate, newGame, type FarmState, type Field, type Order } from './state.js';
 
 export const PLAUSIBLE = {
   tapsPerSec: 15,
@@ -44,12 +48,16 @@ export const PLAUSIBLE = {
   maxTapLevel: 200,
 } as const;
 
-/** What the server has given this player in total: minigame rewards and claimed gifts. */
+/** What the server has given this player in total: minigame rewards, claimed gifts and prizes. */
 export interface Granted {
   coins: number;
   xp: number;
   /** Claimed gifts at base sell price. */
   giftValue?: number;
+  /** Rewarded minigame plays, claimed daily wins and claimed weekly trophies. */
+  plays?: number;
+  crowns?: number;
+  trophies?: number;
 }
 
 export type Verdict =
@@ -80,12 +88,20 @@ function record<K extends string>(v: unknown, keys: readonly K[], what: string, 
 }
 
 const ITEM_IDS = [...CROP_IDS, ...GOOD_IDS] as const;
+const WEEK = /^\d{4}-\d{2}-\d{2}$/;
+
+/** A list of known ids: unknown ones are dropped (renamed in a later version), duplicates too. */
+function idList(v: unknown, known: readonly string[], what: string, max = 1000): string[] {
+  if (!Array.isArray(v) || v.length > max) fail(what);
+  return [...new Set((v as unknown[]).filter((x): x is string => typeof x === 'string' && known.includes(x)))];
+}
 
 /** Validates and copies an uploaded save. Throws on anything malformed. */
 export function parseSave(raw: unknown): FarmState {
   if (!isObj(raw)) fail('not an object');
   const r = raw as Record<string, unknown>;
-  if (r.v !== 1 && r.v !== 2 && r.v !== 3) fail('version');
+  if (r.v !== 1 && r.v !== 2 && r.v !== 3 && r.v !== 4) fail('version');
+  const v4 = r.v === 4;
   const land = int(r.land, 'land', 1, ECONOMY.maxLand);
 
   if (!Array.isArray(r.fields) || r.fields.length < 1 || r.fields.length > land * ECONOMY.fieldsPerLand) fail('fields');
@@ -124,11 +140,11 @@ export function parseSave(raw: unknown): FarmState {
     mill: int(hr.mill, 'helpers.mill', 0, HELPERS.mill.maxLevel),
   };
 
-  if (!Array.isArray(r.orders) || r.orders.length > ECONOMY.orders.slots) fail('orders');
+  if (!Array.isArray(r.orders) || r.orders.length > ECONOMY.orders.slots + 1) fail('orders');
   const orders: Order[] = (r.orders as unknown[]).map((o, i) => {
     if (!isObj(o) || !Array.isArray(o.lines) || o.lines.length < 1 || o.lines.length > 2) fail(`orders[${i}]`);
     const oo = o as Record<string, unknown>;
-    return {
+    const order: Order = {
       id: int(oo.id, `orders[${i}].id`),
       lines: (oo.lines as unknown[]).map((l, j) => {
         if (!isObj(l)) fail(`orders[${i}].lines[${j}]`);
@@ -138,14 +154,16 @@ export function parseSave(raw: unknown): FarmState {
       coins: num(oo.coins, `orders[${i}].coins`),
       xp: num(oo.xp, `orders[${i}].xp`),
     };
+    if (typeof oo.drop === 'string' && ORDER_POOL.includes(oo.drop)) order.drop = oo.drop;
+    return order;
   });
 
   if (!isObj(r.combo) || !isObj(r.stats)) fail('combo/stats');
   const combo = r.combo as Record<string, unknown>;
   const stats = r.stats as Record<string, unknown>;
 
-  return {
-    v: 3,
+  const v3 = {
+    v: 3 as const,
     t: num(r.t, 't'),
     createdAt: num(r.createdAt, 'createdAt'),
     rng: int(r.rng, 'rng', -(2 ** 31), 2 ** 32),
@@ -176,6 +194,38 @@ export function parseSave(raw: unknown): FarmState {
       giftValueIn: (r.v as number) < 3 ? 0 : num(stats.giftValueIn, 'stats.giftValueIn'),
       giftValueOut: (r.v as number) < 3 ? 0 : num(stats.giftValueOut, 'stats.giftValueOut'),
       flowers: (r.v as number) < 3 ? 0 : int(stats.flowers, 'stats.flowers'),
+    },
+  };
+  if (!v4) return migrate(v3);
+
+  if (!isObj(r.prestige) || !isObj(r.found) || !isObj(r.skins)) fail('prestige/found/skins');
+  const pr = r.prestige as Record<string, unknown>;
+  const found = r.found as Record<string, unknown>;
+  const skins = r.skins as Record<string, unknown>;
+  const perks = record(r.perks, PERK_IDS, 'perks');
+  for (const p of PERK_IDS) if (perks[p] > PERKS[p].costs.length) fail(`perks.${p}`);
+  if (!Array.isArray(r.trophies) || r.trophies.length > 2000) fail('trophies');
+  return {
+    ...v3,
+    v: 4,
+    lastPrizeId: int(r.lastPrizeId, 'lastPrizeId'),
+    seeds: int(r.seeds, 'seeds'),
+    prestige: { level: int(pr.level, 'prestige.level', 0, 10_000), seedsEarned: int(pr.seedsEarned, 'prestige.seedsEarned') },
+    perks,
+    found: { animals: idList(found.animals, BREED_IDS, 'found.animals'), decor: idList(found.decor, DECOR_IDS, 'found.decor') },
+    skins: Object.fromEntries(
+      SKIN_SLOTS.map((slot) => [slot, SKINS.some((k) => k.id === skins[slot] && k.slot === slot) ? (skins[slot] as string) : null]),
+    ) as FarmState['skins'],
+    trophies: [...new Set((r.trophies as unknown[]).filter((w): w is string => typeof w === 'string' && WEEK.test(w)))],
+    stats: {
+      ...v3.stats,
+      giftsSent: int(stats.giftsSent, 'stats.giftsSent'),
+      games: int(stats.games, 'stats.games'),
+      plays: record(stats.plays, GAME_IDS, 'stats.plays'),
+      crowns: int(stats.crowns, 'stats.crowns'),
+      bestLevel: int(stats.bestLevel, 'stats.bestLevel', 1, 1000),
+      bestFields: int(stats.bestFields, 'stats.bestFields', 0, ECONOMY.maxLand * ECONOMY.fieldsPerLand),
+      bestFarmhands: int(stats.bestFarmhands, 'stats.bestFarmhands', 0, ECONOMY.maxLand * ECONOMY.fieldsPerLand),
     },
   };
 }
@@ -247,9 +297,10 @@ function capacity(s: FarmState, lvl: number): Capacity {
   for (const a of ANIMAL_IDS as readonly AnimalId[]) {
     const { count } = s.animals[a];
     const value = PLAUSIBLE.valueMult * baseValue(ANIMALS[a].good) * count;
-    cap.rate += value / ANIMALS[a].periodSec;
+    const sec = animalPeriodMs(s, a) / 1000;
+    cap.rate += value / sec;
     cap.lump += value;
-    cap.items += count / ANIMALS[a].periodSec;
+    cap.items += count / sec;
   }
   return cap;
 }
@@ -303,6 +354,21 @@ export function checkSave(prev: FarmState | null, next: FarmState, now: number, 
   }
   // Claimed gifts land in the barn, which counts towards wealth at VALUE_MULT x base price.
   const giftWealth = PLAUSIBLE.valueMult * Math.max(0, s.stats.giftValueIn - base.stats.giftValueIn);
+
+  // Minigame plays and prizes: never more than the server has handed out.
+  if (granted.plays !== undefined && s.stats.games > granted.plays) {
+    s.stats.games = granted.plays;
+    for (const g of GAME_IDS) s.stats.plays[g] = Math.min(s.stats.plays[g], granted.plays);
+    clamped.push('plays');
+  }
+  if (granted.crowns !== undefined && s.stats.crowns > granted.crowns) {
+    s.stats.crowns = granted.crowns;
+    clamped.push('crowns');
+  }
+  if (granted.trophies !== undefined && s.trophies.length > granted.trophies) {
+    s.trophies = s.trophies.slice(0, granted.trophies);
+    clamped.push('trophies');
+  }
   const rewardCoins = Math.max(0, s.stats.rewardCoins - base.stats.rewardCoins);
   const rewardXp = Math.max(0, s.stats.rewardXp - base.stats.rewardXp);
 
@@ -370,6 +436,13 @@ export function checkSave(prev: FarmState | null, next: FarmState, now: number, 
     s.runCoins = s.lifetimeCoins;
     clamped.push('runCoins');
   }
+
+  // Golden Seeds. Each move needs a run worth at least `minSeeds` seeds, and seeds grow with the
+  // square root of a run's coins, so k moves can't have earned more than sqrt(k x lifetime coins).
+  const minRun = PRESTIGE.coinsPerSeed * PRESTIGE.minSeeds ** 2;
+  if (s.prestige.level * minRun > s.lifetimeCoins + 1) return { ok: false, reason: 'prestige' };
+  if (s.prestige.seedsEarned > Math.sqrt((s.prestige.level * s.lifetimeCoins) / PRESTIGE.coinsPerSeed) + 1e-6) return { ok: false, reason: 'seeds' };
+  if (s.seeds + perkSpend(s.perks) > s.prestige.seedsEarned) return { ok: false, reason: 'perks' };
 
   return { ok: true, state: s, clamped };
 }

@@ -63,6 +63,9 @@ export interface FamilyMember {
   lastSeen: number | null;
   /** Won yesterday's daily challenge: wears the crown today. */
   crown: boolean;
+  /** Times moved to new land, and achievements unlocked (the profile badge). */
+  prestige: number;
+  medals: number;
 }
 
 /** Daily challenge state for the caller. `crown` is yesterday's winner, who wears it today. */
@@ -93,8 +96,8 @@ export interface DailyStart {
 export interface PlayResult {
   score: number;
   best: number;
-  /** Apply with the farm's `reward` action. null once today's rewards are used up. */
-  reward: { id: number; coins: number; xp: number } | null;
+  /** Apply with the farm's `reward` action. null once today's rewards are used up. `item`: a collectible, sometimes. */
+  reward: { id: number; coins: number; xp: number; game: import('./games/engine.js').GameId; item: string | null } | null;
   rewardsLeft: number;
   rank?: number;
 }
@@ -127,10 +130,24 @@ export interface InboxVisit {
   seen: boolean;
 }
 
-/** GET /api/inbox: unclaimed gifts and the last week's visits. */
+/** A daily challenge win or a weekly trophy, waiting in the mailbox. */
+export interface InboxPrize {
+  id: number;
+  prize: import('./sim/engine.js').Prize;
+  createdAt: number;
+}
+
+/** GET /api/inbox: unclaimed gifts and prizes, and the last week's visits. */
 export interface Inbox {
   gifts: InboxGift[];
+  prizes: InboxPrize[];
   visits: InboxVisit[];
+}
+
+/** POST /api/prizes/:id/claim: apply with the farm's `prize` action under `seq`. */
+export interface PrizeClaim {
+  seq: number;
+  prize: import('./sim/engine.js').Prize;
 }
 
 export const PUSH_TYPES = ['gift', 'visit', 'ready'] as const;

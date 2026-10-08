@@ -13,7 +13,8 @@
     "orders": "Zakázky",
     "settings": "Nastavení",
     "boards": "Žebříčky",
-    "games": "Hry"
+    "games": "Hry",
+    "book": "Kniha"
   },
   "common": {
     "close": "Zavřít",
@@ -182,7 +183,10 @@
     "locked": "Ještě ne – nejdřív vyšší úroveň",
     "items": "Ve stodole toho není dost",
     "land": "Další pozemek",
-    "saved": "Uloženo"
+    "saved": "Uloženo",
+    "found": "Nové v knize: {name}!",
+    "medal": "{medal} medaile: {name}!",
+    "seeds": "Málo zlatých semínek"
   },
   "welcome": {
     "title": "Vítej zpátky!",
@@ -198,14 +202,13 @@
   "family": {
     "title": "Rodina",
     "login": "Přihlas se a hraj s rodinou",
-    "crown": "Včera vyhrál(a) výzvu"
+    "crown": "Včera vyhrál(a) výzvu",
+    "prestige": "Stěhování na novou zem"
   },
   "boards": {
     "title": "Žebříčky",
     "loginFirst": "Po přihlášení uvidíš, jak se daří celé rodině.",
     "offline": "Farma se teď nemůže spojit se serverem. Zkus to za chvíli.",
-    "soonGames": "Minihry přibudou v některé z dalších verzí.",
-    "soonCollection": "Sběratelská kniha přibude v některé z dalších verzí.",
     "tabs": {
       "allTime": "Celkem",
       "week": "Týden",
@@ -221,7 +224,9 @@
       "minigames": "Nejlepší skóre v každé minihře.",
       "collector": "Kolik ze Sběratelské knihy je hotovo.",
       "achievements": "Získané úspěchy."
-    }
+    },
+    "noGamesYet": "Zatím žádné výsledky.",
+    "noBookYet": "Zatím nic. Mrkni do Sběratelské knihy!"
   },
   "sync": {
     "ok": "Uloženo na serveru farmy v {time}.",
@@ -317,6 +322,260 @@
     "claimAll": "Vzít vše",
     "claimed": "{count, plural, one {Dárek je ve stodole!} few {# dárky jsou ve stodole!} other {# dárků je ve stodole!}}",
     "from": "od: {name}",
-    "visited": "Přišel/přišla: {name}"
+    "visited": "Přišel/přišla: {name}",
+    "prizes": "Výhry",
+    "crown": "Výhra ve výzvě, {date}",
+    "crownItem": "Odměna: {name}",
+    "crownDesc": "Odměna: koruna",
+    "trophy": "Vítěz týdne od {date}",
+    "trophyDesc": "Pohár do vitríny"
+  },
+  "book": {
+    "title": "Sběratelská kniha",
+    "tabs": {
+      "animals": "Zvířata",
+      "decor": "Zahrada",
+      "skins": "Stavby",
+      "medals": "Medaile",
+      "land": "Nová zem"
+    },
+    "filled": "Kniha je vyplněná z {pct} %",
+    "rareHint": "Vzácné: minihry, zakázky, výhry výzev",
+    "breedHint": "Měj {count} × {animal}",
+    "animalsIntro": "Každý nalezený druh zvířete zrychlí farmu o {bonus}, navždy.",
+    "decorIntro": "Ozdoby se objeví na zahradě a každá zrychlí farmu o {bonus}.",
+    "pools": {
+      "garden": "Najdeš při ruční sklizni",
+      "village": "Přijde s některými zakázkami",
+      "fair": "Vyhraješ v minihrách"
+    },
+    "poolTitles": {
+      "garden": "Zahrada",
+      "village": "Vesnice",
+      "fair": "Pouť",
+      "cup": "Poháry"
+    },
+    "cupHint": "{count, plural, one {Vyhraj # týden} few {Vyhraj # týdny} other {Vyhraj # týdnů}}",
+    "cabinet": "Vitrína s poháry ({count})",
+    "weekOf": "Týden od {date}",
+    "noTrophies": "Vyhraj týden v žebříčku Tento týden a získáš pohár.",
+    "skinsIntro": "Medaile a minihry odemykají nový vzhled. Ťukni a použij ho.",
+    "original": "Původní",
+    "skinHint": "{medal} medaile: {name}",
+    "playsHint": "Zahraj si {game} {count}×",
+    "slots": {
+      "barn": "Stodola",
+      "windmill": "Mlýn",
+      "fence": "Plot"
+    },
+    "tiers": {
+      "1": "Bronzová",
+      "2": "Stříbrná",
+      "3": "Zlatá"
+    },
+    "allMedals": "Všechny tři medaile!",
+    "progress": "{value} z {count}",
+    "medalsIntro": "Bronz, stříbro a zlato za každý cíl. Zůstávají i po stěhování.",
+    "seedsStatus": "{seeds} zlatých semínek k utracení · celkem {earned} · farma +{bonus}",
+    "landIntro": "Přestěhuj se na novou zem a začni znovu, bohatší. Kniha, medaile, poháry a zlatá semínka zůstávají; každé získané semínko zrychlí farmu o {bonus}. Mince, pole, zvířata, pomocníci a stodola zůstanou tady.",
+    "runSeeds": "Tahle farma má hodnotu {seeds} z {need} semínek (vyděláno {coins} mincí)",
+    "move": "Přestěhovat se (+{seeds})",
+    "moveConfirm": "Opravdu se stěhovat? (+{seeds})",
+    "moveWarn": "Mince, pole, zvířata, pomocníci a stodola tu zůstanou. Ťukni znovu a přestěhuj se.",
+    "perksTitle": "Vylepšení (za zlatá semínka)",
+    "ach": {
+      "harvest": {
+        "name": "Sklízeč",
+        "goal": "Sklidit {count} plodin"
+      },
+      "taps": {
+        "name": "Mlynář",
+        "goal": "Ťuknout na mlýn {count}×"
+      },
+      "orders": {
+        "name": "Ochotný soused",
+        "goal": "Doručit {count} zakázek"
+      },
+      "eggs": {
+        "name": "Sběrač vajec",
+        "goal": "Nasbírat {count} vajec"
+      },
+      "wool": {
+        "name": "Vlnař",
+        "goal": "Získat {count} klubek vlny"
+      },
+      "milk": {
+        "name": "Mlékař",
+        "goal": "Nadojit {count} lahví mléka"
+      },
+      "honey": {
+        "name": "Včelař",
+        "goal": "Získat {count} sklenic medu"
+      },
+      "level": {
+        "name": "Rosteme",
+        "goal": "Dosáhnout úrovně {count}"
+      },
+      "coins": {
+        "name": "Boháč",
+        "goal": "Vydělat celkem {count} mincí"
+      },
+      "fields": {
+        "name": "Velká farma",
+        "goal": "Mít {count} polí najednou"
+      },
+      "farmhands": {
+        "name": "Parťák",
+        "goal": "Mít {count} pomocníků najednou"
+      },
+      "games": {
+        "name": "Hráč",
+        "goal": "Odehrát {count} miniher s odměnou"
+      },
+      "crowns": {
+        "name": "Šampion",
+        "goal": "Vyhrát {count} denních výzev"
+      },
+      "trophies": {
+        "name": "Vítěz týdne",
+        "goal": "Vyhrát {count} týdnů"
+      },
+      "gifts": {
+        "name": "Štědrost",
+        "goal": "Poslat {count} dárků"
+      },
+      "flowers": {
+        "name": "Oblíbenost",
+        "goal": "Dostat {count} kytiček"
+      },
+      "prestige": {
+        "name": "Průkopník",
+        "goal": "Přestěhovat se {count}×"
+      },
+      "seeds": {
+        "name": "Zlatá sklizeň",
+        "goal": "Získat {count} zlatých semínek"
+      },
+      "decor": {
+        "name": "Zahradník",
+        "goal": "Najít {count} ozdob"
+      },
+      "breeds": {
+        "name": "Přítel zvířat",
+        "goal": "Najít {count} druhů zvířat"
+      }
+    },
+    "perks": {
+      "soil": {
+        "name": "Úrodná půda",
+        "desc": "Vše roste o {next} rychleji (teď {now})."
+      },
+      "arms": {
+        "name": "Silné paže",
+        "desc": "Ťuknutí na mlýn dá o {next} víc (teď {now})."
+      },
+      "night": {
+        "name": "Noční směna",
+        "desc": "Farma pracuje až {hours} h, když tu nejsi."
+      },
+      "friend": {
+        "name": "Starý přítel",
+        "desc": "Na novou zem s tebou přijde pomocník (jeden za úroveň)."
+      },
+      "market": {
+        "name": "Rušný trh",
+        "desc": "Čtvrtá zakázka na tabuli."
+      },
+      "clover": {
+        "name": "Čtyřlístek",
+        "desc": "Sběratelské věci najdeš o {next} častěji (teď {now})."
+      }
+    },
+    "items": {
+      "hen-white": "Bílá slepice",
+      "hen-brown": "Hnědá slepice",
+      "hen-black": "Černá slepice",
+      "hen-speckled": "Krémová slepice",
+      "rooster": "Kohout",
+      "hen-golden": "Zlatá slepice",
+      "sheep-white": "Bílá ovce",
+      "sheep-cream": "Krémová ovce",
+      "sheep-grey": "Šedá ovce",
+      "sheep-brown": "Hnědá ovce",
+      "ram": "Beran",
+      "sheep-black": "Černá ovce",
+      "cow-spotted": "Strakatá kráva",
+      "cow-brown": "Hnědá kráva",
+      "cow-black": "Černostrakatá kráva",
+      "cow-red": "Červenostrakatá kráva",
+      "cow-highland": "Skotská kráva",
+      "piglet": "Prasátko",
+      "bees-honey": "Medonosné včely",
+      "bees-meadow": "Luční včely",
+      "bees-forest": "Lesní včely",
+      "bees-mountain": "Horské včely",
+      "bees-royal": "Královské včely",
+      "bunny": "Králíček",
+      "sunflower": "Slunečnice",
+      "mushrooms": "Muchomůrky",
+      "berry-bush": "Keř s bobulemi",
+      "pine": "Smrček",
+      "apple-tree": "Stromek",
+      "orange-pine": "Podzimní strom",
+      "sapling": "Sazenička",
+      "boulder": "Balvan",
+      "pot-red": "Červené kytičky",
+      "pot-yellow": "Žluté kytičky",
+      "pot-blue": "Modré kytičky",
+      "gnome-red": "Zahradní trpaslík",
+      "gnome-blue": "Trpaslík s modrou čepicí",
+      "birdbath": "Ptačí koupátko",
+      "barrel": "Sud",
+      "watering-can": "Konev",
+      "hay-bale": "Balík sena",
+      "crate": "Bedna",
+      "sack": "Pytel",
+      "bucket": "Vědro",
+      "target": "Terč",
+      "wheelbarrow": "Vozík",
+      "logs": "Polena",
+      "lantern": "Lucerna",
+      "bench": "Lavička",
+      "mailbox": "Poštovní schránka",
+      "birdhouse": "Ptačí budka",
+      "bunting": "Praporky",
+      "balloon-red": "Červený balónek",
+      "balloon-blue": "Modrý balónek",
+      "pinwheel-red": "Červený větrníček",
+      "pinwheel-blue": "Modrý větrníček",
+      "kite-red": "Červený drak",
+      "kite-blue": "Modrý drak",
+      "flag-red": "Červená vlajka",
+      "flag-blue": "Modrá vlajka",
+      "cup-bronze": "Bronzový pohár",
+      "cup-silver": "Stříbrný pohár",
+      "cup-gold": "Zlatý pohár",
+      "cup-diamond": "Diamantový pohár",
+      "barn-blue": "Modrá stodola",
+      "barn-green": "Zelená stodola",
+      "barn-yellow": "Žlutá stodola",
+      "barn-stone": "Kamenná stodola",
+      "barn-wood": "Dřevěná stodola",
+      "windmill-blue": "Modrá střecha",
+      "windmill-green": "Zelená střecha",
+      "windmill-yellow": "Žlutá střecha",
+      "windmill-stone": "Kamenný mlýn",
+      "windmill-brown": "Tmavý mlýn",
+      "fence-white": "Bílý plot",
+      "fence-blue": "Modrý plot",
+      "fence-green": "Zelený plot",
+      "fence-red": "Červený plot",
+      "fence-yellow": "Žlutý plot"
+    }
+  },
+  "newLand": {
+    "title": "Vítej na nové zemi!",
+    "seeds": "Přivezl(a) sis {seeds} zlatých semínek. Utrať je za vylepšení ve Sběratelské knize.",
+    "next": "Kniha, medaile i poháry jedou s tebou a celá farma teď roste rychleji."
   }
 }

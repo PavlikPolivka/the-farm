@@ -13,7 +13,8 @@
     "orders": "Orders",
     "settings": "Settings",
     "boards": "Boards",
-    "games": "Games"
+    "games": "Games",
+    "book": "Book"
   },
   "common": {
     "close": "Close",
@@ -182,7 +183,10 @@
     "locked": "Not yet – level up first",
     "items": "Not enough in the barn",
     "land": "More land",
-    "saved": "Saved"
+    "saved": "Saved",
+    "found": "New in the book: {name}!",
+    "medal": "{medal} medal: {name}!",
+    "seeds": "Not enough Golden Seeds"
   },
   "welcome": {
     "title": "Welcome back!",
@@ -198,14 +202,13 @@
   "family": {
     "title": "Family",
     "login": "Log in to play with the family",
-    "crown": "Won yesterday's challenge"
+    "crown": "Won yesterday's challenge",
+    "prestige": "Moves to new land"
   },
   "boards": {
     "title": "Boards",
     "loginFirst": "Log in to see how the family is doing.",
     "offline": "Can't reach the farm server. Try again in a moment.",
-    "soonGames": "Minigames are coming in a later update.",
-    "soonCollection": "The Collection Book is coming in a later update.",
     "tabs": {
       "allTime": "All time",
       "week": "This week",
@@ -221,7 +224,9 @@
       "minigames": "Best score in each minigame.",
       "collector": "How much of the Collection Book is filled.",
       "achievements": "Achievements unlocked."
-    }
+    },
+    "noGamesYet": "No scores yet.",
+    "noBookYet": "Nothing found yet. Have a look in the Collection Book!"
   },
   "sync": {
     "ok": "Saved on the farm server at {time}.",
@@ -317,6 +322,260 @@
     "claimAll": "Take all",
     "claimed": "{count, plural, one {Gift added to your barn!} other {# gifts added to your barn!}}",
     "from": "from {name}",
-    "visited": "{name} came by"
+    "visited": "{name} came by",
+    "prizes": "Prizes",
+    "crown": "Daily challenge win, {date}",
+    "crownItem": "Prize: {name}",
+    "crownDesc": "Prize: the crown",
+    "trophy": "Winner of the week of {date}",
+    "trophyDesc": "A cup for your trophy cabinet"
+  },
+  "book": {
+    "title": "Collection Book",
+    "tabs": {
+      "animals": "Animals",
+      "decor": "Garden",
+      "skins": "Buildings",
+      "medals": "Medals",
+      "land": "New land"
+    },
+    "filled": "Book filled: {pct} %",
+    "rareHint": "Rare: minigames, orders, daily wins",
+    "breedHint": "Have {count} × {animal}",
+    "animalsIntro": "Every kind of animal you find makes the farm {bonus} faster, for good.",
+    "decorIntro": "Decorations appear in your garden, and each makes the farm {bonus} faster.",
+    "pools": {
+      "garden": "Found when harvesting by hand",
+      "village": "Comes with some orders",
+      "fair": "Won in minigames"
+    },
+    "poolTitles": {
+      "garden": "Garden",
+      "village": "Village",
+      "fair": "Fair",
+      "cup": "Cups"
+    },
+    "cupHint": "{count, plural, one {Win # week} other {Win # weeks}}",
+    "cabinet": "Trophy cabinet ({count})",
+    "weekOf": "Week of {date}",
+    "noTrophies": "Win a week on the This Week board to get a trophy.",
+    "skinsIntro": "Medals and minigames unlock new looks. Tap one to use it.",
+    "original": "Original",
+    "skinHint": "{medal} medal: {name}",
+    "playsHint": "Play {game} {count} times",
+    "slots": {
+      "barn": "Barn",
+      "windmill": "Windmill",
+      "fence": "Fence"
+    },
+    "tiers": {
+      "1": "Bronze",
+      "2": "Silver",
+      "3": "Gold"
+    },
+    "allMedals": "All three medals!",
+    "progress": "{value} of {count}",
+    "medalsIntro": "Bronze, silver and gold for every goal. They stay when you move.",
+    "seedsStatus": "{seeds} Golden Seeds to spend · {earned} earned · farm +{bonus}",
+    "landIntro": "Move to new land to start again, richer. You keep the book, medals, trophies and Golden Seeds; every seed ever earned makes the farm {bonus} faster. Coins, fields, animals, helpers and the barn stay behind.",
+    "runSeeds": "This farm is worth {seeds} of {need} seeds ({coins} coins earned)",
+    "move": "Move to new land (+{seeds})",
+    "moveConfirm": "Really move? (+{seeds})",
+    "moveWarn": "Coins, fields, animals, helpers and the barn stay behind. Tap again to move.",
+    "perksTitle": "Perks (paid with Golden Seeds)",
+    "ach": {
+      "harvest": {
+        "name": "Harvester",
+        "goal": "Harvest {count} crops"
+      },
+      "taps": {
+        "name": "Windmill fan",
+        "goal": "Tap the windmill {count} times"
+      },
+      "orders": {
+        "name": "Helpful neighbour",
+        "goal": "Deliver {count} orders"
+      },
+      "eggs": {
+        "name": "Egg collector",
+        "goal": "Collect {count} eggs"
+      },
+      "wool": {
+        "name": "Woolly",
+        "goal": "Get {count} balls of wool"
+      },
+      "milk": {
+        "name": "Dairy",
+        "goal": "Get {count} bottles of milk"
+      },
+      "honey": {
+        "name": "Beekeeper",
+        "goal": "Get {count} jars of honey"
+      },
+      "level": {
+        "name": "Growing up",
+        "goal": "Reach level {count}"
+      },
+      "coins": {
+        "name": "Rich farmer",
+        "goal": "Earn {count} coins in all"
+      },
+      "fields": {
+        "name": "Big farm",
+        "goal": "Have {count} fields at once"
+      },
+      "farmhands": {
+        "name": "Team leader",
+        "goal": "Have {count} farmhands at once"
+      },
+      "games": {
+        "name": "Player",
+        "goal": "Play {count} minigames with a reward"
+      },
+      "crowns": {
+        "name": "Champion",
+        "goal": "Win {count} daily challenges"
+      },
+      "trophies": {
+        "name": "Winner of the week",
+        "goal": "Win {count} weeks"
+      },
+      "gifts": {
+        "name": "Generous",
+        "goal": "Send {count} gifts"
+      },
+      "flowers": {
+        "name": "Loved",
+        "goal": "Get {count} flowers"
+      },
+      "prestige": {
+        "name": "Pioneer",
+        "goal": "Move to new land {count} times"
+      },
+      "seeds": {
+        "name": "Golden harvest",
+        "goal": "Earn {count} Golden Seeds"
+      },
+      "decor": {
+        "name": "Decorator",
+        "goal": "Find {count} decorations"
+      },
+      "breeds": {
+        "name": "Animal friend",
+        "goal": "Find {count} kinds of animals"
+      }
+    },
+    "perks": {
+      "soil": {
+        "name": "Rich soil",
+        "desc": "Everything grows {next} faster (now {now})."
+      },
+      "arms": {
+        "name": "Strong arms",
+        "desc": "Windmill taps give {next} more (now {now})."
+      },
+      "night": {
+        "name": "Night shift",
+        "desc": "The farm keeps working up to {hours} h while you're away."
+      },
+      "friend": {
+        "name": "Old friend",
+        "desc": "A farmhand comes along to each new land (one per level)."
+      },
+      "market": {
+        "name": "Busy market",
+        "desc": "A 4th order on the board."
+      },
+      "clover": {
+        "name": "Lucky clover",
+        "desc": "Collectibles turn up {next} more often (now {now})."
+      }
+    },
+    "items": {
+      "hen-white": "White hen",
+      "hen-brown": "Brown hen",
+      "hen-black": "Black hen",
+      "hen-speckled": "Cream hen",
+      "rooster": "Rooster",
+      "hen-golden": "Golden hen",
+      "sheep-white": "White sheep",
+      "sheep-cream": "Cream sheep",
+      "sheep-grey": "Grey sheep",
+      "sheep-brown": "Brown sheep",
+      "ram": "Brown-faced ram",
+      "sheep-black": "Black sheep",
+      "cow-spotted": "Spotted cow",
+      "cow-brown": "Brown cow",
+      "cow-black": "Black-spotted cow",
+      "cow-red": "Red-spotted cow",
+      "cow-highland": "Highland cow",
+      "piglet": "Piglet",
+      "bees-honey": "Honey bees",
+      "bees-meadow": "Meadow bees",
+      "bees-forest": "Forest bees",
+      "bees-mountain": "Mountain bees",
+      "bees-royal": "Royal bees",
+      "bunny": "Bunny",
+      "sunflower": "Sunflower",
+      "mushrooms": "Toadstools",
+      "berry-bush": "Berry bush",
+      "pine": "Little spruce",
+      "apple-tree": "Little tree",
+      "orange-pine": "Autumn tree",
+      "sapling": "Sapling",
+      "boulder": "Boulder",
+      "pot-red": "Red flowers",
+      "pot-yellow": "Yellow flowers",
+      "pot-blue": "Blue flowers",
+      "gnome-red": "Garden gnome",
+      "gnome-blue": "Gnome in a blue hat",
+      "birdbath": "Birdbath",
+      "barrel": "Barrel",
+      "watering-can": "Watering can",
+      "hay-bale": "Hay bale",
+      "crate": "Crate",
+      "sack": "Sack",
+      "bucket": "Bucket",
+      "target": "Target",
+      "wheelbarrow": "Cart",
+      "logs": "Logs",
+      "lantern": "Lantern",
+      "bench": "Bench",
+      "mailbox": "Mailbox",
+      "birdhouse": "Birdhouse",
+      "bunting": "Bunting",
+      "balloon-red": "Red balloon",
+      "balloon-blue": "Blue balloon",
+      "pinwheel-red": "Red pinwheel",
+      "pinwheel-blue": "Blue pinwheel",
+      "kite-red": "Red kite",
+      "kite-blue": "Blue kite",
+      "flag-red": "Red flag",
+      "flag-blue": "Blue flag",
+      "cup-bronze": "Bronze cup",
+      "cup-silver": "Silver cup",
+      "cup-gold": "Gold cup",
+      "cup-diamond": "Diamond cup",
+      "barn-blue": "Blue barn",
+      "barn-green": "Green barn",
+      "barn-yellow": "Yellow barn",
+      "barn-stone": "Stone barn",
+      "barn-wood": "Wooden barn",
+      "windmill-blue": "Blue roof",
+      "windmill-green": "Green roof",
+      "windmill-yellow": "Yellow roof",
+      "windmill-stone": "Stone mill",
+      "windmill-brown": "Dark wood mill",
+      "fence-white": "White fence",
+      "fence-blue": "Blue fence",
+      "fence-green": "Green fence",
+      "fence-red": "Red fence",
+      "fence-yellow": "Yellow fence"
+    }
+  },
+  "newLand": {
+    "title": "Welcome to new land!",
+    "seeds": "You brought {seeds} Golden Seeds. Spend them on perks in the Collection Book.",
+    "next": "Your book, medals and trophies came along, and the whole farm grows faster now."
   }
 }

@@ -20,9 +20,13 @@ import {
   type HelperId,
   type ItemId,
 } from '../config/economy.js';
+import { DROPS, PERK_IDS, RARE_BREEDS, SKINS, decorPool, type PerkId, type SkinSlot } from '../config/progress.js';
+import { GAME_IDS, type GameId } from '../games/engine.js';
 import { nextFloat } from './rng.js';
+import { breedsDue, canPrestige, cupsDue, isBreed, isDecor, isFound, perkCost, seedsFor, skinUnlocked, startFarmhands } from './progress.js';
 import {
   animalCost,
+  dropMult,
   comboMult,
   feedNeeds,
   fieldCost,
@@ -37,7 +41,11 @@ import {
   level,
   levelOf,
   maxFields,
+  offlineCapMs,
   orderNeeds,
+  orderSlots,
+  animalPeriodMs,
+  farmhands,
   sellPrice,
   tapCost,
   tapPower,
@@ -61,14 +69,23 @@ export type Action =
   | { type: 'setAutoCrop'; at: number; field: number; crop: CropId }
   | { type: 'deliver'; at: number; order: number }
   | { type: 'tutorial'; at: number; step: number }
-  /** A minigame reward granted by the server (ids increase per player). */
-  | { type: 'reward'; at: number; id: number; coins: number; xp: number }
+  /** A minigame reward granted by the server (ids increase per player), maybe with a collectible. */
+  | { type: 'reward'; at: number; id: number; coins: number; xp: number; game?: GameId; item?: string | null }
+  /** A prize from the server: a daily challenge win or a weekly trophy. */
+  | { type: 'prize'; at: number; id: number; prize: Prize }
+  /** Move to new land: trade this run for Golden Seeds. */
+  | { type: 'prestige'; at: number }
+  | { type: 'buyPerk'; at: number; perk: PerkId }
+  | { type: 'setSkin'; at: number; slot: SkinSlot; skin: string | null }
   /** A gift the server accepted from this player: the items leave the barn. */
   | { type: 'giftSend'; at: number; gift: Gift }
   /** A gift this player claimed from the inbox. */
   | { type: 'giftClaim'; at: number; gift: Gift };
 
-export type FailReason = 'coins' | 'locked' | 'max' | 'busy' | 'empty' | 'unripe' | 'items' | 'invalid';
+/** A daily challenge win (with a collectible, if any was left) or a weekly trophy. */
+export type Prize = { kind: 'crown'; day: string; item: string | null } | { kind: 'trophy'; week: string };
+
+export type FailReason = 'coins' | 'seeds' | 'locked' | 'max' | 'busy' | 'empty' | 'unripe' | 'items' | 'invalid';
 
 export type SimEvent =
   | { type: 'coins'; amount: number; source: 'tap' | 'harvest' | 'sell' | 'order' | 'mill' | 'minigame' }
@@ -77,6 +94,9 @@ export type SimEvent =
   | { type: 'levelUp'; level: number; unlocks: string[] }
   | { type: 'orderDone'; id: number }
   | { type: 'bought'; what: string }
+  /** A new entry in the Collection Book. */
+  | { type: 'found'; id: string }
+  | { type: 'prestige'; seeds: number }
   | { type: 'fail'; reason: FailReason };
 
 export interface Result {
@@ -126,6 +146,8 @@ export function apply(s: FarmState, a: Action): Result {
       const mult = comboMult(s.combo.n);
       const qty = reap(s, crop);
       addXp(s, CROPS[crop].xp, events);
+      // A rare find in the soil: only hand harvests, so it rewards playing.
+      if (nextFloat(s) < DROPS.harvest * dropMult(s)) pickDrop(s, decorPool('garden'), events);
       const coins = CROPS[crop].sellPrice * ECONOMY.harvestCoinShare * mult;
       earn(s, coins);
       f.crop = null;
@@ -147,6 +169,7 @@ export function apply(s: FarmState, a: Action): Result {
       if (s.fields.length >= maxFields(s)) return fail('max');
       if (!spend(s, fieldCost(s))) return fail('coins');
       s.fields.push(emptyField());
+      s.stats.bestFields = Math.max(s.stats.bestFields, s.fields.length);
       events.push({ type: 'bought', what: 'field' });
       break;
     }
@@ -171,6 +194,7 @@ export function apply(s: FarmState, a: Action): Result {
       if (!spend(s, animalCost(s, a.animal))) return fail('coins');
       s.animals[a.animal].count++;
       events.push({ type: 'bought', what: `animal:${a.animal}` });
+      for (const id of breedsDue(s)) collect(s, id, events);
       break;
     }
     case 'buyHelper': {
@@ -185,6 +209,7 @@ export function apply(s: FarmState, a: Action): Result {
         f.auto = true;
         f.autoCrop = f.crop ?? s.lastCrop;
         if (!f.crop) replant(s, i, s.t);
+        s.stats.bestFarmhands = Math.max(s.stats.bestFarmhands, farmhands(s));
       } else {
         s.helpers[a.helper]++;
       }
@@ -209,6 +234,7 @@ export function apply(s: FarmState, a: Action): Result {
       s.stats.ordersDone++;
       s.orders.splice(i, 1);
       events.push({ type: 'coins', amount: o.coins, source: 'order' }, { type: 'orderDone', id: o.id });
+      if (o.drop) collect(s, o.drop, events);
       addXp(s, o.xp, events);
       fillOrders(s);
       break;
@@ -219,15 +245,62 @@ export function apply(s: FarmState, a: Action): Result {
       earn(s, a.coins);
       s.stats.rewardCoins += a.coins;
       s.stats.rewardXp += a.xp;
+      if (a.game && GAME_IDS.includes(a.game)) {
+        s.stats.games++;
+        s.stats.plays[a.game]++;
+      }
       events.push({ type: 'coins', amount: a.coins, source: 'minigame' });
+      if (a.item) collect(s, a.item, events);
       addXp(s, a.xp, events);
       break;
     }
+    case 'prize': {
+      if (!(a.id > s.lastPrizeId)) return fail('invalid');
+      s.lastPrizeId = a.id;
+      if (a.prize.kind === 'crown') {
+        s.stats.crowns++;
+        if (a.prize.item) collect(s, a.prize.item, events);
+      } else if (!s.trophies.includes(a.prize.week)) {
+        s.trophies.push(a.prize.week);
+        for (const id of cupsDue(s)) collect(s, id, events);
+      }
+      break;
+    }
+    case 'prestige': {
+      if (!canPrestige(s)) return fail('locked');
+      const seeds = seedsFor(s.runCoins);
+      newRun(s);
+      s.seeds += seeds;
+      s.prestige.level++;
+      s.prestige.seedsEarned += seeds;
+      events.push({ type: 'prestige', seeds });
+      break;
+    }
+    case 'buyPerk': {
+      if (!PERK_IDS.includes(a.perk)) return fail('invalid');
+      const cost = perkCost(s, a.perk);
+      if (cost === null) return fail('max');
+      if (s.seeds < cost) return fail('seeds');
+      s.seeds -= cost;
+      s.perks[a.perk]++;
+      events.push({ type: 'bought', what: `perk:${a.perk}` });
+      // A new order slot opens right away.
+      if (a.perk === 'market') fillOrders(s);
+      break;
+    }
+    case 'setSkin': {
+      if (!(a.slot in s.skins)) return fail('invalid');
+      if (a.skin !== null && (SKINS.find((k) => k.id === a.skin)?.slot !== a.slot || !skinUnlocked(s, a.skin))) return fail('locked');
+      s.skins[a.slot] = a.skin;
+      break;
+    }
     case 'giftSend': {
-      if (a.gift.kind === 'flower') break;
-      if ((s.inv[a.gift.item] ?? 0) < a.gift.qty) return fail('items');
-      s.inv[a.gift.item] -= a.gift.qty;
-      s.stats.giftValueOut += giftValue(a.gift);
+      if (a.gift.kind === 'item') {
+        if ((s.inv[a.gift.item] ?? 0) < a.gift.qty) return fail('items');
+        s.inv[a.gift.item] -= a.gift.qty;
+        s.stats.giftValueOut += giftValue(a.gift);
+      }
+      s.stats.giftsSent++;
       break;
     }
     case 'giftClaim': {
@@ -257,7 +330,7 @@ export function apply(s: FarmState, a: Action): Result {
 export function advance(s: FarmState, to: number): SimEvent[] {
   const events: SimEvent[] = [];
   if (!(to > s.t)) return events;
-  const capped = Math.min(to, s.t + ECONOMY.offlineCapHours * 3600_000);
+  const capped = Math.min(to, s.t + offlineCapMs(s));
   while (s.t < capped) {
     const dt = Math.min(ECONOMY.tickMs, capped - s.t);
     s.t += dt;
@@ -297,7 +370,7 @@ function step(s: FarmState, dt: number, events: SimEvent[]): void {
     if (!herd.count) continue;
     const def = ANIMALS[a];
     herd.progressMs += dt;
-    const period = def.periodSec * 1000;
+    const period = animalPeriodMs(s, a);
     while (herd.progressMs >= period) {
       herd.progressMs -= period;
       const fed = def.feed ? Math.min(herd.count, Math.floor(s.inv[def.feed] / def.feedPer)) : herd.count;
@@ -363,12 +436,61 @@ function addXp(s: FarmState, amount: number, events: SimEvent[]): void {
   s.xp += amount;
   const after = levelOf(s.xp);
   for (let l = before + 1; l <= after; l++) events.push({ type: 'levelUp', level: l, unlocks: unlocksAt(l) });
+  s.stats.bestLevel = Math.max(s.stats.bestLevel, after);
 }
 
-/** Keeps `ECONOMY.orders.slots` orders open, generated from what the player can produce. */
-export function fillOrders(s: FarmState): void {
-  while (s.orders.length < ECONOMY.orders.slots) s.orders.push(makeOrder(s));
+/** Adds a breed or decoration to the Collection Book (once). */
+function collect(s: FarmState, id: string, events: SimEvent[]): void {
+  if (isFound(s, id)) return;
+  if (isBreed(id)) s.found.animals.push(id);
+  else if (isDecor(id)) s.found.decor.push(id);
+  else return;
+  events.push({ type: 'found', id });
 }
+
+/** Something from `pool` that isn't in the book yet, picked with the farm's rng. */
+export function unfound(s: FarmState, pool: readonly string[], reserved: readonly string[] = []): string | null {
+  const left = pool.filter((id) => !isFound(s, id) && !reserved.includes(id));
+  return left.length ? left[Math.floor(nextFloat(s) * left.length)]! : null;
+}
+
+function pickDrop(s: FarmState, pool: readonly string[], events: SimEvent[]): void {
+  const id = unfound(s, pool);
+  if (id) collect(s, id, events);
+}
+
+/** Prestige: a fresh run on new land. Seeds, perks, the book, skins, trophies and stats stay. */
+function newRun(s: FarmState): void {
+  const fresh = newGame(s.t, 0);
+  s.coins = 0;
+  s.runCoins = 0;
+  s.xp = 0;
+  s.tapLevel = 0;
+  s.land = 1;
+  s.fields = fresh.fields;
+  s.inv = fresh.inv;
+  s.animals = fresh.animals;
+  s.helpers = fresh.helpers;
+  s.yieldCarry = 0;
+  s.orders = [];
+  s.combo = { n: 0, lastAt: 0 };
+  s.lastCrop = 'wheat';
+  // The "old friend" perk: farmhands that come along to the new land.
+  for (let i = 0; i < startFarmhands(s); i++) {
+    s.fields[i]!.auto = true;
+    replant(s, i, s.t);
+  }
+  fillOrders(s);
+}
+
+/** Keeps the order board full (3 slots, 4 with the market perk), generated from what the player can produce. */
+export function fillOrders(s: FarmState): void {
+  while (s.orders.length < orderSlots(s)) s.orders.push(makeOrder(s));
+}
+
+/** Village decorations and rare animals that orders and minigames can pay. */
+export const ORDER_POOL = [...decorPool('village'), ...RARE_BREEDS];
+export const MINIGAME_POOL = [...decorPool('fair'), ...RARE_BREEDS];
 
 function makeOrder(s: FarmState): Order {
   const lvl = level(s);
@@ -390,10 +512,15 @@ function makeOrder(s: FarmState): Order {
     return { item, qty: Math.max(2, Math.min(99, Math.round(target / lines / base))) };
   });
   const value = orderLines.reduce((sum, l) => sum + l.qty * (isCrop(l.item) ? CROPS[l.item].sellPrice : GOODS[l.item].sellPrice), 0);
-  return {
+  const order: Order = {
     id: s.nextOrderId++,
     lines: orderLines,
     coins: Math.round(value * ECONOMY.orders.rewardMult),
     xp: Math.round(ECONOMY.orders.xpBase * Math.pow(ECONOMY.orders.xpGrowth, lvl - 1)) + lines * 2,
   };
+  if (nextFloat(s) < DROPS.order * dropMult(s)) {
+    const drop = unfound(s, ORDER_POOL, s.orders.flatMap((o) => (o.drop ? [o.drop] : [])));
+    if (drop) order.drop = drop;
+  }
+  return order;
 }

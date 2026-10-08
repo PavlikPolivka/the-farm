@@ -1,5 +1,9 @@
 import {
+  ACHIEVEMENT_IDS,
   CROPS,
+  achievementTier,
+  canPrestige,
+  offlineCapMs,
   formatDuration,
   formatNumber,
   growMs,
@@ -26,10 +30,11 @@ import { renderSettings } from './settings.js';
 import { ITEM_SPRITE, buildSheet, type Sheet, type SheetKind } from './sheets.js';
 import { FamilyBar } from './social.js';
 import { inboxSheet } from './inbox.js';
+import { itemName } from './book.js';
 import { Visit } from './visit.js';
 import { Tutorial } from './tutorial.js';
 
-const FAIL_TOAST: Partial<Record<FailReason, string>> = { coins: 'toast.coins', locked: 'toast.locked', items: 'toast.items' };
+const FAIL_TOAST: Partial<Record<FailReason, string>> = { coins: 'toast.coins', seeds: 'toast.seeds', locked: 'toast.locked', items: 'toast.items' };
 const SEED_KEY = 'pf:seed';
 
 /** Owns the DOM around the canvas: HUD, bottom bar, sheets, toasts, tutorial. */
@@ -54,6 +59,10 @@ export class Ui {
   private bar = h('nav', { class: 'bar' });
   private family: FamilyBar;
   private visit: Visit;
+  /** Lit while the farm can move to new land. */
+  private bookDot: HTMLElement | null = null;
+  /** Medal count after the last event, to spot new achievements. */
+  private medalTiers = '';
 
   constructor(
     private store: Store,
@@ -84,6 +93,7 @@ export class Ui {
     this.mount();
     this.tutorial = new Tutorial(store, () => this.scene, () => this.sheetKind);
     this.tutorial.render();
+    this.medalTiers = ACHIEVEMENT_IDS.map((id) => achievementTier(store.state, id)).join('');
     store.subscribe((events) => this.onEvents(events));
     sync.subscribe((notice) => this.onSync(notice));
     const loop = () => {
@@ -124,7 +134,9 @@ export class Ui {
     clear(this.bar);
     const btn = (kind: SheetKind, icon: string) =>
       h('button', { 'data-open': kind, on: { click: () => (this.sheetKind === kind ? this.close() : this.open(kind)) } }, sprite(icon, 2), h('span', null, t(`bar.${kind}`)));
-    this.bar.append(btn('shop', 'coin'), btn('barn', 'barn-icon'), btn('orders', 'sign'), btn('games', 'card-back'), btn('boards', 'trophy'));
+    this.bar.append(btn('shop', 'coin'), btn('barn', 'barn-icon'), btn('orders', 'sign'), btn('games', 'card-back'), btn('book', 'book'), btn('boards', 'trophy'));
+    this.bookDot = h('span', { class: 'dot', hidden: true, 'data-testid': 'book-dot' });
+    this.bar.querySelector('[data-open="book"]')!.append(this.bookDot);
   }
 
   /** Language changed: rebuild every label. */
@@ -205,7 +217,8 @@ export class Ui {
     if (!r.ok) {
       const fail = r.events.find((e) => e.type === 'fail');
       const key = fail?.type === 'fail' ? FAIL_TOAST[fail.reason] : undefined;
-      if (key) toast(t(key), fail?.type === 'fail' && fail.reason === 'coins' ? 'coin' : 'lock');
+      const reason = fail?.type === 'fail' ? fail.reason : null;
+      if (key) toast(t(key), reason === 'coins' ? 'coin' : reason === 'seeds' ? 'golden-seed' : 'lock');
       return false;
     }
     for (const e of r.events) {
@@ -289,7 +302,29 @@ export class Ui {
         toast(t('toast.levelUp', { level: e.level }) + (names ? ` ${t('toast.unlocked', { list: names })}` : ''), 'star', 4000);
         buzz(30);
       }
+      if (e.type === 'found') {
+        toast(t('toast.found', { name: itemName(e.id) }), e.id, 4000);
+        buzz(30);
+      }
+      if (e.type === 'prestige') this.celebrate(e.seeds);
     }
+    this.checkMedals();
+  }
+
+  /** Toasts every achievement tier reached since the last check. */
+  private checkMedals(): void {
+    const s = this.store.state;
+    const tiers = ACHIEVEMENT_IDS.map((id) => achievementTier(s, id));
+    const key = tiers.join('');
+    if (key === this.medalTiers) return;
+    const before = this.medalTiers;
+    this.medalTiers = key;
+    // Many at once means the farm was swapped (loaded from the server), not earned just now.
+    if (!before || tiers.filter((n, i) => n > Number(before[i])).length > 3) return;
+    ACHIEVEMENT_IDS.forEach((id, i) => {
+      const was = Number(before[i]);
+      if (tiers[i]! > was) toast(t('toast.medal', { name: t(`book.ach.${id}.name`), medal: t(`book.tiers.${tiers[i]}`) }), `medal-${['', 'bronze', 'silver', 'gold'][tiers[i]!]}`, 4000);
+    });
   }
 
   private updateHud(): void {
@@ -302,6 +337,7 @@ export class Ui {
     this.hud.xp.style.width = `${Math.round(((s.xp - from) / (to - from)) * 100)}%`;
     this.hud.seedIcon.src = `/sprites/${this.seed}.png`;
     this.hud.seedLabel.textContent = t(`items.${this.seed}.name`);
+    if (this.bookDot) this.bookDot.hidden = !canPrestige(s);
   }
 
   // ---------------------------------------------------------------- sync & welcome
@@ -354,6 +390,29 @@ export class Ui {
     if (notice === 'clamped' || notice === 'rejected') toast(t('sync.adjusted'), 'lock', 5000);
   }
 
+  /** Moved to new land: a moment worth more than a toast. */
+  private celebrate(seeds: number): void {
+    this.close();
+    const modal = h(
+      'div',
+      { class: 'sheet modal', role: 'dialog', 'aria-modal': 'true', 'data-testid': 'new-land' },
+      h(
+        'div',
+        { class: 'panel welcome' },
+        h('div', { class: 'panel-head' }, sprite('golden-seed', 2), h('h2', null, t('newLand.title'))),
+        h(
+          'div',
+          { class: 'panel-body' },
+          h('p', null, t('newLand.seeds', { seeds })),
+          h('p', null, t('newLand.next')),
+          h('button', { class: 'primary', on: { click: () => modal.remove() } }, t('welcome.ok')),
+        ),
+      ),
+    );
+    document.body.append(modal);
+    buzz(60);
+  }
+
   welcome(awayMs: number, events: SimEvent[]): void {
     if (awayMs < 120_000) return;
     let coins = 0;
@@ -374,7 +433,7 @@ export class Ui {
         h(
           'div',
           { class: 'panel-body' },
-          h('p', null, t('welcome.away', { time: formatDuration(Math.min(awayMs, 24 * 3600_000) / 1000) })),
+          h('p', null, t('welcome.away', { time: formatDuration(Math.min(awayMs, offlineCapMs(this.store.state)) / 1000) })),
           h(
             'ul',
             { class: 'gains' },

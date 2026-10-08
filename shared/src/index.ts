@@ -11,3 +11,5 @@ export * from './sim/validate.js';
 export * from './time.js';
 export * from './games/index.js';
 export * from './sim/social.js';
+export * from './config/progress.js';
+export * from './sim/progress.js';

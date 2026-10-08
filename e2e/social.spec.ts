@@ -25,7 +25,7 @@ test('visit a farm, leave a sticker and a flower; the owner finds both in the ma
   await kid.locator('[data-gift-item="flower"]').click();
   await kid.screenshot({ path: `test-results/gift-${info.project.name}.png` });
   await kid.locator('[data-gift="send"]').click();
-  await expect(kid.locator('.toast')).toContainText(/Gift sent|Dárek odeslán/);
+  await expect(kid.locator('.toast', { hasText: /Gift sent|Dárek odeslán/ })).toBeVisible();
   await kid.screenshot({ path: `test-results/visit-${info.project.name}.png` });
   await kid.locator('[data-visit="home"]').click();
   await expect(kid.locator('.bar')).toBeVisible();

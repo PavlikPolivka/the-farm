@@ -6,6 +6,7 @@ import {
   formatNumber,
   giftCap,
   maxGiftQty,
+  medalCounts,
   migrate,
   type FamilyMember,
   type Gift,
@@ -32,6 +33,16 @@ export const STICKER_SPRITE: Record<Sticker, string> = {
 };
 
 const fmt = (n: number) => formatNumber(n, locale());
+
+/** The profile badge: moves to new land and medals by colour. */
+function badge(s: ReturnType<typeof migrate>): (Node | string)[] {
+  const m = medalCounts(s);
+  const out: (Node | string)[] = [];
+  if (s.prestige.level) out.push(sprite('golden-seed', 1), String(s.prestige.level));
+  for (const [tier, n] of [['gold', m.gold], ['silver', m.silver - m.gold], ['bronze', m.bronze - m.silver]] as const)
+    if (n > 0) out.push(sprite(`medal-${tier}`, 1), String(n));
+  return out;
+}
 
 /**
  * Visiting someone's village: their farm, read-only, in the same scene; a banner with who it
@@ -108,7 +119,12 @@ export class Visit {
         'div',
         { class: 'visit-banner' },
         h('span', { class: 'avatar-wrap' }, avatar(member, 'md'), village.crown ? sprite('crown', 1) : null),
-        h('div', { class: 'visit-title' }, h('h2', null, t('visit.title', { name: member.name })), h('p', { class: 'desc' }, sprite('star', 1), t('hud.level', { level: village.level }))),
+        h(
+          'div',
+          { class: 'visit-title' },
+          h('h2', null, t('visit.title', { name: member.name })),
+          h('p', { class: 'desc badge-line', 'data-testid': 'visit-badge' }, sprite('star', 1), t('hud.level', { level: village.level }), ...badge(state)),
+        ),
         h('button', { class: 'primary home', data: { visit: 'home' }, on: { click: () => this.close() } }, sprite('barn-icon', 2), t('visit.home')),
       ),
       h('div', { class: 'visit-panel' }, h('p', { class: 'desc' }, t('visit.leaveSticker')), stickers, sent, giftBtn),

@@ -1,4 +1,4 @@
-import type { Inbox, InboxGift } from '@pixel-farm/shared';
+import type { Inbox, InboxGift, InboxPrize, PrizeClaim } from '@pixel-farm/shared';
 import type { Store } from '../game/store.js';
 import type { Sync } from '../game/sync.js';
 import { locale, t } from '../i18n/index.js';
@@ -6,6 +6,7 @@ import { clear, h, sprite } from './dom.js';
 import { toast } from './effects.js';
 import { ITEM_SPRITE, type Sheet } from './sheets.js';
 import { avatar } from './social.js';
+import { itemName } from './book.js';
 import { STICKER_SPRITE } from './visit.js';
 
 export async function fetchInbox(): Promise<Inbox | null> {
@@ -18,7 +19,14 @@ export async function fetchInbox(): Promise<Inbox | null> {
 }
 
 /** Unclaimed gifts and new visits: the number on the mailbox. */
-export const inboxCount = (inbox: Inbox) => inbox.gifts.length + inbox.visits.filter((v) => !v.seen).length;
+export const inboxCount = (inbox: Inbox) => inbox.gifts.length + (inbox.prizes?.length ?? 0) + inbox.visits.filter((v) => !v.seen).length;
+
+const prizeTitle = (p: InboxPrize) =>
+  p.prize.kind === 'trophy'
+    ? t('inbox.trophy', { date: new Date(`${p.prize.week}T12:00:00Z`).toLocaleDateString(locale()) })
+    : t('inbox.crown', { date: new Date(`${p.prize.day}T12:00:00Z`).toLocaleDateString(locale()) });
+const prizeDesc = (p: InboxPrize) =>
+  p.prize.kind === 'trophy' ? t('inbox.trophyDesc') : p.prize.item ? t('inbox.crownItem', { name: itemName(p.prize.item) }) : t('inbox.crownDesc');
 
 const giftLabel = (g: InboxGift) => (g.gift.kind === 'flower' ? t('visit.flower') : t(`items.${g.gift.item}.count`, { count: g.gift.qty }));
 const giftIcon = (g: InboxGift) => (g.gift.kind === 'flower' ? 'sticker-flower' : ITEM_SPRITE[g.gift.item]);
@@ -41,11 +49,34 @@ export function inboxSheet(ctx: { store: Store; sync: Sync; onChange(): void }):
     return true;
   };
 
+  const claimPrize = async (p: InboxPrize): Promise<boolean> => {
+    const res = await fetch(`/api/prizes/${p.id}/claim`, { method: 'POST' }).catch(() => null);
+    if (!res?.ok) return false;
+    const { seq, prize } = (await res.json()) as PrizeClaim;
+    ctx.store.dispatch({ type: 'prize', id: seq, prize });
+    return true;
+  };
+
   const render = (inbox: Inbox | null) => {
     clear(body);
     if (!inbox) {
       body.append(h('p', { class: 'empty' }, t(ctx.sync.me ? 'boards.offline' : 'boards.loginFirst')));
       return;
+    }
+    if (inbox.prizes?.length) {
+      body.append(h('h3', { class: 'inbox-head' }, sprite('trophy', 1), t('inbox.prizes')));
+      const list = h('div', { class: 'cards' });
+      for (const p of inbox.prizes) {
+        const btn = h('button', { class: 'primary buy', data: { prize: String(p.id) } }, t('inbox.claim'));
+        btn.addEventListener('click', async () => {
+          btn.disabled = true;
+          if (await claimPrize(p)) ctx.sync.upload();
+          await reload();
+        });
+        const icon = p.prize.kind === 'trophy' ? 'trophy' : (p.prize.item ?? 'crown');
+        list.append(h('div', { class: 'card prize' }, sprite(icon, 3), h('div', { class: 'card-text' }, h('h3', null, prizeTitle(p)), h('p', { class: 'meta' }, prizeDesc(p))), btn));
+      }
+      body.append(list);
     }
     body.append(h('h3', { class: 'inbox-head' }, sprite('gift', 1), t('inbox.gifts')));
     if (!inbox.gifts.length) body.append(h('p', { class: 'empty' }, t('inbox.noGifts')));

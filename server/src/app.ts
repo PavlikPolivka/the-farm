@@ -7,6 +7,7 @@ import type { Config } from './config.js';
 import type { DB } from './db.js';
 import { registerBoards } from './boards.js';
 import { registerGames } from './games.js';
+import { registerPrizes } from './prizes.js';
 import { registerSocial } from './social.js';
 import { registerPush } from './push.js';
 import { registerSaves } from './saves.js';
@@ -15,7 +16,7 @@ import { getMe } from './users.js';
 /** Files the browser must always revalidate, so a deploy is picked up on next launch. */
 const NO_CACHE = new Set(['/', '/index.html', '/sw.js', '/manifest.webmanifest', '/registerSW.js']);
 
-export async function buildApp(cfg: Config, db: DB, clock: () => number = Date.now): Promise<FastifyInstance> {
+export async function buildApp(cfg: Config, db: DB, clock: () => number = Date.now, random: () => number = Math.random): Promise<FastifyInstance> {
   const app = Fastify({ logger: process.env.NODE_ENV === 'test' ? false : { level: 'info' }, trustProxy: true });
 
   await app.register(cookie, { secret: cfg.sessionSecret });
@@ -23,8 +24,9 @@ export async function buildApp(cfg: Config, db: DB, clock: () => number = Date.n
   registerPush(app, cfg, db);
   registerSaves(app, db, clock);
   registerBoards(app, db, clock);
-  registerGames(app, cfg, db, clock);
+  registerGames(app, cfg, db, clock, random);
   registerSocial(app, db, clock);
+  registerPrizes(app, db, clock);
 
   app.get('/healthz', async () => ({ ok: true, version: APP_VERSION }));
 

@@ -12,6 +12,7 @@ import {
   type HelperId,
   type ItemId,
 } from '../config/economy.js';
+import { COLLECTION_BONUS, PERK_EFFECT, PRESTIGE } from '../config/progress.js';
 import type { Field, FarmState } from './state.js';
 
 export const isCrop = (item: ItemId): item is CropId => item in CROPS;
@@ -28,8 +29,24 @@ export function levelOf(xp: number): number {
 
 export const level = (s: FarmState) => levelOf(s.xp);
 
+/**
+ * Everything that makes the farm produce faster across runs: Golden Seeds, the soil perk and
+ * the Collection Book. It speeds up crops and animals alike.
+ */
+export const prodMult = (s: FarmState) =>
+  (1 + PRESTIGE.seedBonus * s.prestige.seedsEarned) *
+  (1 + PERK_EFFECT.soil * s.perks.soil) *
+  (1 + COLLECTION_BONUS.breed * s.found.animals.length + COLLECTION_BONUS.decor * s.found.decor.length);
+
 export const growMs = (s: FarmState, crop: CropId) =>
-  (CROPS[crop].growSec * 1000) / (1 + ECONOMY.sprinklerSpeed * s.helpers.sprinkler);
+  (CROPS[crop].growSec * 1000) / (1 + ECONOMY.sprinklerSpeed * s.helpers.sprinkler) / prodMult(s);
+
+/** Time one animal takes per product. */
+export const animalPeriodMs = (s: FarmState, a: AnimalId) => (ANIMALS[a].periodSec * 1000) / prodMult(s);
+
+export const offlineCapMs = (s: FarmState) => (s.perks.night > 0 ? PERK_EFFECT.nightHours : ECONOMY.offlineCapHours) * 3600_000;
+export const orderSlots = (s: FarmState) => ECONOMY.orders.slots + (s.perks.market > 0 ? 1 : 0);
+export const dropMult = (s: FarmState) => 1 + PERK_EFFECT.clover * s.perks.clover;
 
 export const isRipe = (s: FarmState, f: Field, at = s.t) => f.crop !== null && at >= f.plantedAt + growMs(s, f.crop);
 
@@ -42,7 +59,7 @@ export function growth(s: FarmState, f: Field, at = s.t): number {
 export const sellPrice = (s: FarmState, item: ItemId) =>
   (isCrop(item) ? CROPS[item].sellPrice : GOODS[item].sellPrice) * (1 + ECONOMY.millPrice * s.helpers.mill);
 
-export const tapPower = (s: FarmState) => Math.round(Math.pow(s.tapLevel + 1, ECONOMY.tap.powerExp));
+export const tapPower = (s: FarmState) => Math.round(Math.pow(s.tapLevel + 1, ECONOMY.tap.powerExp) * (1 + PERK_EFFECT.arms * s.perks.arms));
 export const tapCost = (s: FarmState) => Math.round(ECONOMY.tap.costBase * Math.pow(ECONOMY.tap.costGrowth, s.tapLevel));
 
 export const maxFields = (s: FarmState) => s.land * ECONOMY.fieldsPerLand;
@@ -82,7 +99,7 @@ export function incomeRate(s: FarmState): number {
   const crops = unlockedCrops(s);
   const field = Math.max(...crops.map((c) => CROPS[c].sellPrice / (growMs(s, c) / 1000)));
   let rate = field * s.fields.length;
-  for (const a of ANIMAL_IDS) rate += (s.animals[a].count * GOODS[ANIMALS[a].good].sellPrice) / ANIMALS[a].periodSec;
+  for (const a of ANIMAL_IDS) rate += (s.animals[a].count * GOODS[ANIMALS[a].good].sellPrice) / (animalPeriodMs(s, a) / 1000);
   return rate;
 }
 

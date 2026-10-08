@@ -19,6 +19,7 @@ import { requireUser } from './auth.js';
 import type { DB } from './db.js';
 import { crownFor } from './games.js';
 import { getPrefs, queueGift, queueVisit, setPrefs } from './notify.js';
+import { awardPrizes, inboxPrizes } from './prizes.js';
 import { loadSave } from './saves.js';
 
 const INBOX_DAYS = 7;
@@ -104,6 +105,7 @@ export function registerSocial(app: FastifyInstance, db: DB, clock: () => number
 
   app.get('/api/inbox', { preHandler: requireUser }, async (req): Promise<Inbox> => {
     const now = clock();
+    awardPrizes(db, now);
     const gifts = (
       db
         .prepare(
@@ -120,7 +122,7 @@ export function registerSocial(app: FastifyInstance, db: DB, clock: () => number
         )
         .all(req.userId, now - INBOX_DAYS * 86_400_000) as { id: number; visitor_id: number; name: string; sticker: Sticker | null; created_at: number; seen_at: number | null }[]
     ).map((v): InboxVisit => ({ id: v.id, visitor: { id: v.visitor_id, name: v.name }, sticker: v.sticker, createdAt: v.created_at, seen: v.seen_at !== null }));
-    return { gifts, visits };
+    return { gifts, prizes: inboxPrizes(db, req.userId!), visits };
   });
 
   app.post<{ Params: { id: string } }>('/api/gifts/:id/claim', { preHandler: requireUser }, async (req, reply) => {

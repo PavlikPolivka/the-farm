@@ -101,6 +101,8 @@ export function family(db: DB, me: number, now: number): FamilyMember[] {
       weekCoins: p.week_key === week ? (p.week_coins ?? 0) : 0,
       lastSeen: p.updated_at,
       crown: p.userId === crown,
+      prestige: p.prestige_level ?? 0,
+      medals: p.achievements ?? 0,
     }),
   );
   return [...list.filter((p) => p.id === me), ...list.filter((p) => p.id !== me)];

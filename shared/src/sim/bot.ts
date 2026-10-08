@@ -23,6 +23,8 @@ import {
   unlockedCrops,
 } from './rules.js';
 import type { FarmState } from './state.js';
+import { PERK_IDS } from '../config/progress.js';
+import { canPrestige, perkCost } from './progress.js';
 
 export interface Profile {
   name: string;
@@ -43,6 +45,10 @@ export interface Milestones {
   firstHelper?: number;
   level: Record<number, number>;
   land2?: number;
+  /** When each move to new land happened. */
+  prestige: number[];
+  /** Collection Book size (breeds + decorations) at the end of each day. */
+  foundByDay: number[];
   /** Seconds actually spent in sessions. */
   playedSec?: number;
 }
@@ -60,7 +66,7 @@ export function simulate(
   onFrame?: (s: FarmState) => void,
 ): { state: FarmState; milestones: Milestones } {
   const s = startGame(T0, 12345);
-  const m: Milestones = { level: {} };
+  const m: Milestones = { level: {}, prestige: [], foundByDay: [] };
   const first = T0 + (p.sessions[0]?.[0] ?? 0) * 3_600_000;
   const mark = (at: number) => (at - first) / 1000;
   let tapDebt = 0;
@@ -84,9 +90,15 @@ export function simulate(
         const lvl = level(s);
         for (let l = 2; l <= lvl; l++) m.level[l] ??= mark(t);
         if (m.land2 === undefined && s.land >= 2) m.land2 = mark(t);
+        // Move as soon as the run is worth it, then spend the seeds.
+        if (canPrestige(s) && apply(s, { type: 'prestige', at: t }).ok) {
+          m.prestige.push(mark(t));
+          buyPerks(s, t);
+        }
         onFrame?.(s);
       }
     }
+    m.foundByDay.push(s.found.animals.length + s.found.decor.length);
   }
   advance(s, Math.min(T0 + untilSec * 1000, T0 + p.days * 86_400_000));
   return { state: s, milestones: m };
@@ -111,12 +123,26 @@ function playFrame(s: FarmState, at: number, tap: boolean): void {
   buyCheapest(s, at);
 
   const best = [...unlockedCrops(s)].reverse().find((c) => CROPS[c].seedCost <= s.coins / 4) ?? 'wheat';
+  // Hand-planted fields grow what the open orders are still missing first, like a player would.
+  const missing = () =>
+    CROP_IDS.find((c) => unlockedCrops(s).includes(c) && s.inv[c] + s.fields.filter((f) => f.crop === c).length < orderNeeds(s, c) && CROPS[c].seedCost <= s.coins);
   s.fields.forEach((f, i) => {
-    if (!f.crop && !f.auto) act({ type: 'plant', at, field: i, crop: best });
+    if (!f.crop && !f.auto) act({ type: 'plant', at, field: i, crop: missing() ?? best });
     if (f.auto && f.autoCrop !== best && CROPS[best].seedCost <= s.coins / 10) act({ type: 'setAutoCrop', at, field: i, crop: best });
   });
 
   if (tap) act({ type: 'tap', at });
+}
+
+/** Cheapest perk first; ties go to the earlier one in PERK_IDS. */
+function buyPerks(s: FarmState, at: number): void {
+  for (;;) {
+    const options = PERK_IDS.map((perk) => ({ perk, cost: perkCost(s, perk) })).filter((o): o is { perk: (typeof PERK_IDS)[number]; cost: number } => o.cost !== null);
+    options.sort((a, b) => a.cost - b.cost);
+    const pick = options[0];
+    if (!pick || pick.cost > s.seeds) return;
+    apply(s, { type: 'buyPerk', at, perk: pick.perk });
+  }
 }
 
 function buyCheapest(s: FarmState, at: number): void {

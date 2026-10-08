@@ -1,14 +1,19 @@
 import { createHmac } from 'node:crypto';
 import type { FastifyInstance } from 'fastify';
 import {
+  DROPS,
   GAMES,
   GAME_IDS,
+  MINIGAME_POOL,
   dailyGame,
+  dropMult,
+  isFound,
   dayKey,
   minigameReward,
   newGame,
   prevDay,
   replay,
+  type FarmState,
   type DailyInfo,
   type DailyStart,
   type GameId,
@@ -31,11 +36,16 @@ const DAILY_GRACE_MS = 10 * 60_000;
 export const dailySeed = (secret: string, day: string) => createHmac('sha256', secret).update(day).digest().readUInt32BE(0);
 
 /** All minigame rewards granted to a player so far. Saves may not claim more. */
-export function granted(db: DB, userId: number): { coins: number; xp: number } {
-  return db.prepare('SELECT COALESCE(SUM(coins), 0) AS coins, COALESCE(SUM(xp), 0) AS xp FROM minigame_plays WHERE user_id = ?').get(userId) as {
-    coins: number;
-    xp: number;
-  };
+export function granted(db: DB, userId: number): { coins: number; xp: number; plays: number } {
+  return db
+    .prepare('SELECT COALESCE(SUM(coins), 0) AS coins, COALESCE(SUM(xp), 0) AS xp, COUNT(*) AS plays FROM minigame_plays WHERE user_id = ?')
+    .get(userId) as { coins: number; xp: number; plays: number };
+}
+
+/** Something from `pool` the farm hasn't found yet, or null. */
+export function pickUnfound(farm: FarmState, pool: readonly string[], random: () => number = Math.random): string | null {
+  const left = pool.filter((id) => !isFound(farm, id));
+  return left.length ? left[Math.floor(random() * left.length)]! : null;
 }
 
 /** The day's winner: best finished score, earliest finish breaks ties. */
@@ -49,7 +59,7 @@ export function crownFor(db: DB, day: string): { userId: number; name: string } 
   return row ?? null;
 }
 
-export function registerGames(app: FastifyInstance, cfg: Config, db: DB, clock: () => number = Date.now): void {
+export function registerGames(app: FastifyInstance, cfg: Config, db: DB, clock: () => number = Date.now, random: () => number = Math.random): void {
   const rewardedToday = (userId: number, game: GameId, day: string) =>
     (db.prepare('SELECT COUNT(*) AS n FROM minigame_plays WHERE user_id = ? AND game = ? AND day = ? AND ranked = 0').get(userId, game, day) as { n: number }).n;
 
@@ -65,16 +75,17 @@ export function registerGames(app: FastifyInstance, cfg: Config, db: DB, clock: 
       )
       .run(userId, game, score, now);
 
-  /** Grants and records a reward based on the player's last synced farm. */
+  /** Grants and records a reward based on the player's last synced farm, sometimes with a collectible. */
   const grant = (userId: number, game: GameId, day: string, seed: number, score: number, ranked: boolean, now: number) => {
     const farm = loadSave(db, userId)?.state ?? newGame(now, 0);
     const { coins, xp } = minigameReward(farm, score, GAMES[game].par, ranked ? DAILY_MULT : 1);
+    const item = random() < DROPS.minigame * dropMult(farm) ? pickUnfound(farm, MINIGAME_POOL, random) : null;
     const id = Number(
       db
-        .prepare('INSERT INTO minigame_plays (user_id, game, day, seed, score, ranked, coins, xp, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)')
-        .run(userId, game, day, seed, score, ranked ? 1 : 0, coins, xp, now).lastInsertRowid,
+        .prepare('INSERT INTO minigame_plays (user_id, game, day, seed, score, ranked, coins, xp, item, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)')
+        .run(userId, game, day, seed, score, ranked ? 1 : 0, coins, xp, item, now).lastInsertRowid,
     );
-    return { id, coins, xp };
+    return { id, coins, xp, game, item };
   };
 
   const dailyInfo = (userId: number, now: number): DailyInfo => {

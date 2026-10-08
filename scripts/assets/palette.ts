@@ -26,6 +26,7 @@ export const PALETTE = {
   P: '#dfa988', // skin shade
   s: '#99d8f8', // sky
   S: '#79a7e8', // blue
+  q: '#f28462', // pink (pigs, bunny ears)
 } as const;
 
 export type PaletteKey = keyof typeof PALETTE;

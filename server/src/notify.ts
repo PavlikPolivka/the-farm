@@ -54,6 +54,11 @@ export function queueGift(db: DB, toId: number, fromName: string, now: number): 
   insertJob(db, toId, 'gift', afterQuiet(now, quietOf(db, toId)), { from: fromName });
 }
 
+/** A prize in the mailbox: sent like a gift, and switched off with gifts. */
+export function queuePrize(db: DB, userId: number, prize: 'crown' | 'trophy', now: number): void {
+  insertJob(db, userId, 'gift', afterQuiet(now, quietOf(db, userId)), { prize });
+}
+
 /** One pending visit job at a time; it goes out an hour after the previous one at the earliest. */
 export function queueVisit(db: DB, ownerId: number, now: number): void {
   const pending = db.prepare("SELECT 1 FROM jobs WHERE user_id = ? AND type = 'visit' AND sent_at IS NULL").get(ownerId);
@@ -70,14 +75,18 @@ export function planReady(db: DB, userId: number, s: FarmState, now: number): vo
   insertJob(db, userId, 'ready', afterQuiet(ripeAt, quietOf(db, userId)));
 }
 
-const TEXT: Record<Locale, Record<PushType, { title: string; body: string }> & { sticker: string }> = {
+const TEXT: Record<Locale, Record<PushType | 'crown' | 'trophy', { title: string; body: string }> & { sticker: string }> = {
   cs: {
+    crown: { title: 'Vyhrál(a) jsi výzvu! 👑', body: 'Za včerejší výzvu na tebe čeká odměna ve schránce.' },
+    trophy: { title: 'Vítěz týdne! 🏆', body: 'Do vitríny ti přibyl pohár. Vyzvedni si ho ve schránce.' },
     gift: { title: 'Dárek! 🎁', body: '{name} ti poslal(a) dárek. Otevři farmu a vyzvedni si ho.' },
     visit: { title: 'Návštěva na farmě', body: '{name} se podíval(a) na tvou farmu.' },
     ready: { title: 'Úroda je zralá 🌾', body: 'Všechna tvoje pole jsou připravená ke sklizni.' },
     sticker: ' A nechal(a) ti nálepku!',
   },
   en: {
+    crown: { title: 'You won the challenge! 👑', body: "A prize for yesterday's challenge is waiting in your mailbox." },
+    trophy: { title: 'Winner of the week! 🏆', body: 'A new cup for your trophy cabinet is in your mailbox.' },
     gift: { title: 'A gift! 🎁', body: '{name} sent you a gift. Open the farm to collect it.' },
     visit: { title: 'Someone visited', body: '{name} visited your farm.' },
     ready: { title: 'Crops are ready 🌾', body: 'All your fields are ready to harvest.' },
@@ -142,8 +151,8 @@ export async function runJobs(
       }
       msg = { ...text.ready, url: '/' };
     } else if (job.type === 'gift') {
-      const { from } = JSON.parse(job.payload_json) as { from: string };
-      msg = { title: text.gift.title, body: text.gift.body.replace('{name}', from), url: '/?open=inbox' };
+      const { from, prize } = JSON.parse(job.payload_json) as { from?: string; prize?: 'crown' | 'trophy' };
+      msg = prize ? { ...text[prize], url: '/?open=inbox' } : { title: text.gift.title, body: text.gift.body.replace('{name}', from ?? ''), url: '/?open=inbox' };
     } else {
       // Everyone who came since the last visit message.
       const last = db.prepare("SELECT MAX(sent_at) AS t FROM jobs WHERE user_id = ? AND type = 'visit' AND result = 'sent'").get(job.user_id) as { t: number | null };

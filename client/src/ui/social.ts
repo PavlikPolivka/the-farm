@@ -78,7 +78,9 @@ export class FamilyBar {
       chips.append(h('button', { class: 'chip login', data: { family: 'login' }, on: { click: () => this.login() } }, sprite('farmhand', 1), t('family.login')));
       return;
     }
-    const members = this.members.length ? this.members : [{ id: me.id, name: me.displayName, level: 0, lifetimeCoins: 0, weekCoins: 0, lastSeen: null, crown: false }];
+    const members: FamilyMember[] = this.members.length
+      ? this.members
+      : [{ id: me.id, name: me.displayName, level: 0, lifetimeCoins: 0, weekCoins: 0, lastSeen: null, crown: false, prestige: 0, medals: 0 }];
     for (const m of members) {
       chips.append(
         h(
@@ -92,6 +94,7 @@ export class FamilyBar {
           h('span', { class: 'avatar-wrap' }, avatar(m), m.crown ? sprite('crown', 1, t('family.crown')) : null),
           h('span', { class: 'chip-name' }, firstName(m.name)),
           m.level ? h('span', { class: 'chip-level' }, sprite('star', 1), String(m.level)) : null,
+          m.prestige ? h('span', { class: 'chip-level', title: t('family.prestige') }, sprite('golden-seed', 1), String(m.prestige)) : null,
         ),
       );
     }
@@ -105,8 +108,8 @@ const BOARD_ICON: Record<BoardId, string> = {
   week: 'coin',
   daily: 'star',
   minigames: 'sparkle',
-  collector: 'barn-icon',
-  achievements: 'star',
+  collector: 'book',
+  achievements: 'medal-gold',
 };
 
 /** Value cell per board. */
@@ -117,19 +120,19 @@ function value(board: BoardId, r: BoardRow): (Node | string)[] {
     case 'week':
       return [sprite('coin', 1), fmt(r.value)];
     case 'collector':
-      return [`${Math.floor(r.value)} %`];
+      return [sprite('book', 1), `${formatNumber(r.value, locale())} %`];
     case 'achievements':
-      return [sprite('star', 1), String(r.value)];
+      return [sprite('medal-gold', 1), String(r.value)];
     default:
       return [fmt(r.value)];
   }
 }
 
-/** Boards whose feature arrives in a later milestone: say so instead of ranking zeros. */
+/** Boards nobody has scored on yet: say so instead of ranking zeros. */
 function comingSoon(board: Board): string | null {
   const rows = board.sections.flatMap((s) => s.rows);
-  if (board.board === 'daily' || board.board === 'minigames') return rows.length ? null : t('boards.soonGames');
-  if (board.board === 'collector' || board.board === 'achievements') return rows.some((r) => r.value > 0) ? null : t('boards.soonCollection');
+  if (board.board === 'daily' || board.board === 'minigames') return rows.length ? null : t('boards.noGamesYet');
+  if (board.board === 'collector' || board.board === 'achievements') return rows.some((r) => r.value > 0) ? null : t('boards.noBookYet');
   return null;
 }
 

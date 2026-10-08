@@ -30,10 +30,11 @@ import {
 import type { Command, Store } from '../game/store.js';
 import { locale, t } from '../i18n/index.js';
 import { clear, h, sprite } from './dom.js';
+import { bookSheet, itemName } from './book.js';
 import { gamesSheet, type GamesCtx } from './games.js';
 import { boardsSheet } from './social.js';
 
-export type SheetKind = 'shop' | 'barn' | 'orders' | 'games' | 'boards' | 'inbox' | 'settings' | 'seeds';
+export type SheetKind = 'shop' | 'barn' | 'orders' | 'games' | 'book' | 'boards' | 'inbox' | 'settings' | 'seeds';
 
 export interface SheetCtx {
   store: Store;
@@ -145,7 +146,7 @@ function shop(ctx: SheetCtx): Sheet {
       }),
       card(ctx, {
         id: 'tap', icon: 'windmill', name: t('shop.tap.name'),
-        desc: () => t('shop.tap.desc', { power: fmt(tapPower(s())), next: fmt(Math.round(Math.pow(s().tapLevel + 2, 1.5))) }),
+        desc: () => t('shop.tap.desc', { power: fmt(tapPower(s())), next: fmt(tapPower({ ...s(), tapLevel: s().tapLevel + 1 })) }),
         meta: () => t('common.levelOf', { level: s().tapLevel + 1 }),
         cost: () => tapCost(s()), locked: () => null, max: () => false, cmd: { type: 'buyTap' },
       }),
@@ -231,7 +232,16 @@ function orders(ctx: SheetCtx): Sheet {
           'div',
           { class: 'order card', data: { order: String(o.id) } },
           h('ul', null, ...lines.map((x) => x.el)),
-          h('div', { class: 'reward' }, h('span', null, t('orders.reward')), sprite('coin', 1), fmt(o.coins), sprite('star', 1), String(o.xp)),
+          h(
+            'div',
+            { class: 'reward' },
+            h('span', null, t('orders.reward')),
+            sprite('coin', 1),
+            fmt(o.coins),
+            sprite('star', 1),
+            String(o.xp),
+            o.drop ? h('span', { class: 'drop', data: { drop: o.drop } }, '+', sprite(o.drop, 1, itemName(o.drop))) : null,
+          ),
           btn,
         );
         (el as HTMLElement & { refresh?: () => void }).refresh = () => {
@@ -311,6 +321,8 @@ export function buildSheet(kind: SheetKind, ctx: SheetCtx): Sheet {
       return boardsSheet(ctx);
     case 'games':
       return gamesSheet(ctx.games);
+    case 'book':
+      return bookSheet(ctx);
     case 'inbox':
       return ctx.inbox();
     case 'settings': {

@@ -12,6 +12,7 @@ import { PNG } from 'pngjs';
 import { PACKS } from './packs.js';
 import { PALETTE, hexToRgba, type PaletteKey } from './palette.js';
 import { GENERATED, assertValid, type SpriteDef } from './generated.js';
+import { COLLECTION_SPRITES, RECOLOURS } from './collection.js';
 import { TILES } from './tiles.js';
 import { PUBLIC, ROOT } from './paths.js';
 
@@ -67,9 +68,29 @@ function render(def: SpriteDef): PNG {
   );
   return png;
 }
-for (const def of GENERATED) {
+for (const def of [...GENERATED, ...COLLECTION_SPRITES]) {
+  if (sprites.has(def.name)) throw new Error(`duplicate sprite name ${def.name}`);
   sprites.set(def.name, render(def));
-  manifest.push({ file: `sprites/${def.name}.png`, source: 'scripts/assets/generated.ts', pack: 'Pixel Farm (generated)', license: 'CC0-1.0' });
+  const file = GENERATED.includes(def) ? 'generated.ts' : 'collection.ts';
+  manifest.push({ file: `sprites/${def.name}.png`, source: `scripts/assets/${file}`, pack: 'Pixel Farm (generated)', license: 'CC0-1.0' });
+}
+
+// ---- recoloured variants (breeds, skins, cups, medals): colour-for-colour swaps
+for (const r of RECOLOURS) {
+  const src = sprites.get(r.from);
+  if (!src) throw new Error(`${r.name}: no sprite "${r.from}" to recolour`);
+  if (sprites.has(r.name)) throw new Error(`duplicate sprite name ${r.name}`);
+  for (const to of Object.values(r.map)) if (!master.has(to)) throw new Error(`${r.name}: ${to} is not in the master palette`);
+  const png = new PNG({ width: src.width, height: src.height });
+  src.data.copy(png.data);
+  for (let i = 0; i < png.data.length; i += 4) {
+    if (!png.data[i + 3] || (r.maxRow !== undefined && Math.floor(i / 4 / png.width) > r.maxRow)) continue;
+    const to = r.map[hex(png.data, i)];
+    if (to) png.data.set(hexToRgba(to), i);
+  }
+  sprites.set(r.name, png);
+  const base = manifest.find((m) => m.file === `sprites/${r.from}.png`)!;
+  manifest.push({ ...base, file: `sprites/${r.name}.png`, source: `${base.source} (recoloured in scripts/assets/collection.ts)` });
 }
 
 for (const [name, png] of sprites) write(join(PUBLIC, 'sprites', `${name}.png`), png);
@@ -136,4 +157,6 @@ writeFileSync(
   ].join('\n'),
 );
 
-console.log(`assets: ${sprites.size} sprites (${Object.keys(TILES).length} sliced, ${GENERATED.length} generated), master palette ${master.size} colours`);
+console.log(
+  `assets: ${sprites.size} sprites (${Object.keys(TILES).length} sliced, ${GENERATED.length + COLLECTION_SPRITES.length} generated, ${RECOLOURS.length} recoloured), master palette ${master.size} colours`,
+);

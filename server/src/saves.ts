@@ -1,8 +1,10 @@
 import type { FastifyInstance } from 'fastify';
 import {
   checkSave,
+  collectionPct,
   isSaveError,
   level,
+  medals,
   migrate,
   parseSave,
   weekKey,
@@ -15,6 +17,7 @@ import { requireUser } from './auth.js';
 import type { DB } from './db.js';
 import { granted } from './games.js';
 import { planReady } from './notify.js';
+import { prizesClaimed } from './prizes.js';
 import { giftsClaimedValue } from './social.js';
 
 interface SaveRow {
@@ -40,15 +43,23 @@ function storeSave(db: DB, userId: number, version: number, prev: FarmState | nu
   const week = weekKey(now);
   const earned = Math.max(0, s.lifetimeCoins - (prev?.lifetimeCoins ?? 0));
   db.prepare(
-    `INSERT INTO stats (user_id, lifetime_coins, week_key, week_coins, level, updated_at)
-     VALUES (@userId, @lifetime, @week, @earned, @level, @now)
+    `INSERT INTO stats (user_id, lifetime_coins, week_key, week_coins, level, prestige_level, collection_pct, achievements, updated_at)
+     VALUES (@userId, @lifetime, @week, @earned, @level, @prestige, @pct, @medals, @now)
      ON CONFLICT(user_id) DO UPDATE SET
        lifetime_coins = excluded.lifetime_coins,
        week_coins = CASE WHEN stats.week_key = excluded.week_key THEN stats.week_coins + excluded.week_coins ELSE excluded.week_coins END,
        week_key = excluded.week_key,
        level = excluded.level,
+       prestige_level = excluded.prestige_level,
+       collection_pct = excluded.collection_pct,
+       achievements = excluded.achievements,
        updated_at = excluded.updated_at`,
-  ).run({ userId, lifetime: s.lifetimeCoins, week, earned, level: level(s), now });
+  ).run({ userId, lifetime: s.lifetimeCoins, week, earned, level: level(s), prestige: s.prestige.level, pct: collectionPct(s), medals: medals(s), now });
+  // Kept per week, so last week's winner is still known after the reset.
+  db.prepare(
+    `INSERT INTO week_coins (user_id, week, coins) VALUES (?, ?, ?)
+     ON CONFLICT(user_id, week) DO UPDATE SET coins = coins + excluded.coins`,
+  ).run(userId, week, earned);
 }
 
 export function registerSaves(app: FastifyInstance, db: DB, clock: () => number = Date.now): void {
@@ -77,7 +88,11 @@ export function registerSaves(app: FastifyInstance, db: DB, clock: () => number 
       if (body.baseVersion !== version) return { code: 409, body: { version, state: current?.state ?? null } satisfies SaveResponse };
 
       const now = clock();
-      const verdict = checkSave(current?.state ?? null, next, now, { ...granted(db, userId), giftValue: giftsClaimedValue(db, userId) });
+      const verdict = checkSave(current?.state ?? null, next, now, {
+        ...granted(db, userId),
+        ...prizesClaimed(db, userId),
+        giftValue: giftsClaimedValue(db, userId),
+      });
       if (!verdict.ok) {
         req.log.warn({ userId, reason: verdict.reason }, 'save rejected');
         return { code: 422, body: { error: 'rejected', reason: verdict.reason, version, state: current?.state ?? null } };

@@ -34,7 +34,10 @@ export function weekKey(ms: number): string {
 export const dayNumber = (day: string) => Math.round(Date.parse(`${day}T00:00:00Z`) / DAY_MS);
 
 /** The day before a day key ("2026-10-01" → "2026-09-30"). */
-export const prevDay = (day: string) => iso(Date.parse(`${day}T00:00:00Z`) - DAY_MS);
+export const prevDay = (day: string) => addDays(day, -1);
+
+/** A day key moved by `n` days; with a Monday key and n = ±7 it steps weeks. */
+export const addDays = (day: string, n: number) => iso(Date.parse(`${day}T00:00:00Z`) + n * DAY_MS);
 
 /** Minutes since midnight in Prague. */
 export function pragueMinutes(ms: number): number {

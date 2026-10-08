@@ -2,7 +2,10 @@ import Phaser from 'phaser';
 import {
   ANIMALS,
   ANIMAL_IDS,
+  DECOR_IDS,
   ECONOMY,
+  SKINS,
+  skinSprite,
   formatNumber,
   growth,
   isRipe,
@@ -32,7 +35,13 @@ export const SPRITES = [
   'hay', 'trough', 'sign', 'lock', 'farmhand', 'sparkle', 'windmill', 'windmill-sails', 'barn-icon', 'chicken', 'sheep',
   'cow', 'beehive', 'coin',
   ...['wheat', 'carrot', 'corn', 'tomato', 'cabbage'].flatMap((c) => [`${c}-1`, `${c}-2`, `${c}-3`]),
+  ...DECOR_IDS,
+  ...SKINS.flatMap((k) => (k.slot === 'fence' ? [`${k.id}-l`, `${k.id}-m`, `${k.id}-r`] : [k.id])),
 ];
+
+/** Decorations found are shown in the garden below the fields, this many per row. */
+const GARDEN_PER_ROW = 7;
+const GARDEN_PITCH = 18;
 
 export type Target = 'windmill' | 'barn' | 'pen' | 'land' | `field:${number}`;
 
@@ -147,8 +156,7 @@ export class FarmScene extends Phaser.Scene {
   update(_time: number, delta: number): void {
     const s = this.farm;
     // Field count, land or animal herd changed: rebuild the static layout.
-    const key = `${s.fields.length}:${s.land}:${ANIMAL_IDS.map((a) => (s.animals[a].count ? 1 : 0)).join('')}`;
-    if (key !== this.layoutKey) this.rebuild();
+    if (layoutKey(s) !== this.layoutKey) this.rebuild();
     this.updateFields(s);
     this.updateAnimals(s);
     if (!prefersReducedMotion()) {
@@ -193,7 +201,12 @@ export class FarmScene extends Phaser.Scene {
   }
 
   private worldHeight(): number {
-    return this.landRowY() + (landLevel(this.farm) === null ? 0 : 24) + 8;
+    const rows = Math.ceil(this.farm.found.decor.length / GARDEN_PER_ROW);
+    return this.gardenY() + rows * GARDEN_PITCH + 8;
+  }
+
+  private gardenY(): number {
+    return this.landRowY() + (landLevel(this.farm) === null ? 0 : 24) + 4;
   }
 
   private landRowY(): number {
@@ -254,8 +267,8 @@ export class FarmScene extends Phaser.Scene {
     img('bush', 0, 0);
     img('tree-orange', 96, 0);
     img('tree-orange', 24, 0);
-    img('barn-icon', BARN.x, BARN.y).setScale(S * 2);
-    img('windmill', WINDMILL.x, WINDMILL.y);
+    img(skinSprite(s, 'barn') ?? 'barn-icon', BARN.x, BARN.y).setScale(S * 2);
+    img(skinSprite(s, 'windmill') ?? 'windmill', WINDMILL.x, WINDMILL.y);
     this.sails = img('windmill-sails', WINDMILL.hubX, WINDMILL.hubY, 0.5);
     img('hay', PEN.x, PEN.y + 32);
     img('trough', PEN.x + 16, PEN.y + 32);
@@ -273,9 +286,13 @@ export class FarmScene extends Phaser.Scene {
       if (!prefersReducedMotion())
         this.tweens.add({ targets: animal, y: (y - 1) * S, yoyo: true, repeat: -1, duration: 300 + n * 70, delay: n * 120, repeatDelay: 900 + n * 300 });
     });
-    img('fence-l', 0, 64);
-    for (let x = 16; x < W - 16; x += 16) img('fence-m', x, 64);
-    img('fence-r', W - 16, 64);
+    const fence = skinSprite(s, 'fence') ?? 'fence';
+    img(`${fence}-l`, 0, 64);
+    for (let x = 16; x < W - 16; x += 16) img(`${fence}-m`, x, 64);
+    img(`${fence}-r`, W - 16, 64);
+
+    // The garden: every decoration in the Collection Book, in the order it was found.
+    s.found.decor.forEach((id, n) => img(id, (n % GARDEN_PER_ROW) * 16, this.gardenY() + Math.floor(n / GARDEN_PER_ROW) * GARDEN_PITCH));
 
     // Fields.
     s.fields.forEach((_, i) => {
@@ -305,7 +322,7 @@ export class FarmScene extends Phaser.Scene {
       this.landRow = { sign, lock, label };
     }
 
-    this.layoutKey = `${s.fields.length}:${s.land}:${ANIMAL_IDS.map((a) => (s.animals[a].count ? 1 : 0)).join('')}`;
+    this.layoutKey = layoutKey(s);
     this.setScroll(this.cameras.main.scrollY);
   }
 
@@ -344,6 +361,10 @@ export class FarmScene extends Phaser.Scene {
     }
   }
 }
+
+/** Anything that changes the static layout: fields, land, herds, skins, the garden. */
+const layoutKey = (s: FarmState) =>
+  [s.fields.length, s.land, ANIMAL_IDS.map((a) => (s.animals[a].count ? 1 : 0)).join(''), Object.values(s.skins).join(','), s.found.decor.length].join(':');
 
 export function fieldPos(i: number): { x: number; y: number } {
   const perRow = ECONOMY.fieldsPerLand;

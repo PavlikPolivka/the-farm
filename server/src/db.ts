@@ -113,6 +113,27 @@ const MIGRATIONS: string[] = [
    CREATE INDEX jobs_due ON jobs(sent_at, due_at);
    CREATE INDEX jobs_user_type ON jobs(user_id, type, sent_at);
    ALTER TABLE users ADD COLUMN prefs_json TEXT NOT NULL DEFAULT '{}';`,
+  // M5: coins per week (for weekly trophies), prizes, collectibles from minigames.
+  `CREATE TABLE week_coins (
+     user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+     week TEXT NOT NULL,
+     coins REAL NOT NULL,
+     PRIMARY KEY (user_id, week)
+   );
+   INSERT INTO week_coins (user_id, week, coins) SELECT user_id, week_key, week_coins FROM stats WHERE week_key != '';
+   CREATE TABLE prizes (
+     id INTEGER PRIMARY KEY,
+     user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+     kind TEXT NOT NULL,            -- 'crown' (daily challenge win) or 'trophy' (weekly board win)
+     key TEXT NOT NULL,             -- the day or the week (Monday)
+     payload_json TEXT NOT NULL,
+     created_at INTEGER NOT NULL,
+     claimed_at INTEGER,
+     claim_seq INTEGER,             -- per-player order of claims: the farm's prize id
+     UNIQUE (user_id, kind, key)
+   );
+   CREATE INDEX prizes_user ON prizes(user_id, claimed_at);
+   ALTER TABLE minigame_plays ADD COLUMN item TEXT;`,
 ];
 
 export function openDb(path: string): DB {
