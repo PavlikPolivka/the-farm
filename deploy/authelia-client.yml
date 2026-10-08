@@ -13,7 +13,7 @@ identity_providers:
         client_name: 'Pixel Farm'
         client_secret: '$pbkdf2-sha512$310000$REPLACE_WITH_DIGEST'
         public: false
-        # The kid has no second factor. The app itself only admits groups pixel-farm / pixel-farm-admin.
+        # The kid has no second factor. The app itself only admits PLAY_GROUPS / ADMIN_GROUPS.
         authorization_policy: 'one_factor'
         consent_mode: 'implicit'
         require_pkce: true

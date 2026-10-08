@@ -1,8 +1,7 @@
-# No forward_auth here: the app does its own OIDC login against Authelia.
-farm.ppolivka.com {
+# Appended to /opt/caddy/Caddyfile by homelab-setup.sh. Same port-per-app pattern as the
+# other services; the Cloudflare tunnel maps farm.ppolivka.com -> http://caddy:9097.
+# No forward_auth: the app does its own OIDC login against Authelia.
+:9097 {
 	encode zstd gzip
-	# Caddy on the `portal` Docker network:
 	reverse_proxy pixel-farm:3000
-	# Caddy on the host instead (with the loopback port enabled in compose.yml):
-	# reverse_proxy 127.0.0.1:3000
 }

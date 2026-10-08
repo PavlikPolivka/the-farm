@@ -58,6 +58,14 @@ describe('auth', () => {
     expect(loadConfig({ NODE_ENV: 'production', SESSION_SECRET: 'x'.repeat(32), DEV_FAKE_USER: 'pavel' }).devFakeUser).toBeNull();
   });
 
+  it('reads play and admin groups from env with defaults', () => {
+    expect(loadConfig({ NODE_ENV: 'test' })).toMatchObject({ playGroups: ['pixel-farm'], adminGroups: ['pixel-farm-admin'] });
+    expect(loadConfig({ NODE_ENV: 'test', PLAY_GROUPS: 'family, pixel-farm', ADMIN_GROUPS: 'admins' })).toMatchObject({
+      playGroups: ['family', 'pixel-farm'],
+      adminGroups: ['admins'],
+    });
+  });
+
   it('returns 503 from /auth/login when OIDC is not configured', async () => {
     const { app } = await setup();
     expect((await app.inject({ url: '/auth/login' })).statusCode).toBe(503);

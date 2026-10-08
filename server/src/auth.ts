@@ -7,8 +7,6 @@ import { SESSION_COOKIE, SESSION_MS, createSession, deleteSession, touchSession 
 import { upsertUser } from './users.js';
 
 const FLOW_COOKIE = 'pf_oidc';
-const PLAY_GROUP = 'pixel-farm';
-const ADMIN_GROUP = 'pixel-farm-admin';
 
 declare module 'fastify' {
   interface FastifyRequest {
@@ -120,14 +118,15 @@ export function registerAuth(app: FastifyInstance, cfg: Config, db: DB): void {
     // Authelia may keep profile/groups out of the ID token, so read them from userinfo.
     const info = await oidc.fetchUserInfo(config, tokens.access_token, idClaims.sub);
     const groups = (info.groups ?? idClaims.groups ?? []) as string[];
-    if (!groups.includes(PLAY_GROUP) && !groups.includes(ADMIN_GROUP)) {
+    const isAdmin = groups.some((g) => cfg.adminGroups.includes(g));
+    if (!isAdmin && !groups.some((g) => cfg.playGroups.includes(g))) {
       return reply.redirect('/?login=forbidden');
     }
     const userId = upsertUser(db, {
       sub: idClaims.sub,
       displayName: String(info.name ?? info.preferred_username ?? idClaims.sub),
       locale: pickLocale(req.headers['accept-language']),
-      isAdmin: groups.includes(ADMIN_GROUP),
+      isAdmin,
     });
     setSessionCookie(reply, createSession(db, userId));
     return reply.redirect('/');

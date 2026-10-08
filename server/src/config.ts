@@ -7,6 +7,9 @@ export interface Config {
   staticDir: string | null;
   oidc: { issuer: string; clientId: string; clientSecret: string } | null;
   vapid: { publicKey: string; privateKey: string; subject: string } | null;
+  /** Authelia groups allowed to play / to administer. Admins may always play. */
+  playGroups: string[];
+  adminGroups: string[];
   /** Dev-only: treat every unauthenticated request as this user. Ignored in production. */
   devFakeUser: string | null;
 }
@@ -38,6 +41,13 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): Config {
     staticDir: env.STATIC_DIR ?? null,
     oidc,
     vapid,
+    playGroups: list(env.PLAY_GROUPS, ['pixel-farm']),
+    adminGroups: list(env.ADMIN_GROUPS, ['pixel-farm-admin']),
     devFakeUser: !production && env.DEV_FAKE_USER ? env.DEV_FAKE_USER : null,
   };
+}
+
+function list(value: string | undefined, fallback: string[]): string[] {
+  const items = (value ?? '').split(',').map((s) => s.trim()).filter(Boolean);
+  return items.length ? items : fallback;
 }

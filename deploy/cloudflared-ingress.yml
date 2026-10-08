@@ -1,8 +1,8 @@
-# Add above the catch-all rule in the tunnel's config.yml (or as a Public Hostname in the
-# Zero Trust dashboard if the tunnel is remotely managed). Point it at Caddy the same way
-# the existing *.ppolivka.com hostnames are pointed.
+# The homelab tunnel is token-managed, so ingress lives in the Cloudflare dashboard:
+#   Zero Trust → Networks → Tunnels → <tunnel> → Public Hostname → Add
+#     Subdomain: farm   Domain: ppolivka.com
+#     Service:   HTTP   URL: caddy:9097
+# This also creates the DNS record. Equivalent config-file form, for reference:
 ingress:
   - hostname: farm.ppolivka.com
-    service: https://caddy:443          # match the existing entries
-    originRequest:
-      originServerName: farm.ppolivka.com
+    service: http://caddy:9097
