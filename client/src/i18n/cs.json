@@ -155,7 +155,7 @@
     "pushSent": "Odesláno. Za chvilku dorazí.",
     "tutorial": "Ukázat průvodce znovu",
     "credits": "Poděkování",
-    "creditsText": "Grafika: Kenney.nl (CC0). Pár pixelů navíc ve stejných barvách.",
+    "creditsText": "Grafika: Kenney.nl, volné dílo (CC0):",
     "push": {
       "gift": "Dárky",
       "visit": "Návštěvy",
@@ -165,7 +165,11 @@
       "label": "Klid:",
       "start": "Klid od",
       "end": "Klid do"
-    }
+    },
+    "sound": "Zvuk a pohyb",
+    "sounds": "Zvuky",
+    "music": "Hudba",
+    "creditsOwn": "Další pixely, hudbu a zvuky pro hru vytvořil Claude Code a jsou také volné dílo (CC0)."
   },
   "tutorial": {
     "skip": "Přeskočit",

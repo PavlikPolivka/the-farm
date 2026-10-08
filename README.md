@@ -2,7 +2,7 @@
 
 A family pixel-art farm clicker PWA. See [docs/DESIGN.md](docs/DESIGN.md) for the spec, [docs/DECISIONS.md](docs/DECISIONS.md) for the decisions made while building, and [deploy/DEPLOY.md](deploy/DEPLOY.md) for homelab setup.
 
-**Status:** M5: move to new land (prestige) with Golden Seeds and perks, the Collection Book (24 animals, 40 decorations, 15 building skins, 60 medals), daily and weekly prizes; on top of social and push (M4), minigames (M3), save sync and boards (M2) and the farm loop (M1). M0 passed on Android; the iPhone login test is pending.
+**Status:** M6 (polish): chiptune music and sounds (off by default), reduced motion, Czech font check, credits, nightly backups, size budget; all milestones M0–M6 built. M0 passed on Android; the iPhone login test is pending.
 
 ## Develop
 Requires Node 22 (`nvm use`) and pnpm 10 (`corepack enable`).

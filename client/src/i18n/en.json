@@ -155,7 +155,7 @@
     "pushSent": "Sent. It should arrive in a moment.",
     "tutorial": "Show the guide again",
     "credits": "Credits",
-    "creditsText": "Art: Kenney.nl (CC0). Extra pixels drawn in the same palette.",
+    "creditsText": "Art: Kenney.nl, public domain (CC0):",
     "push": {
       "gift": "Gifts",
       "visit": "Visits",
@@ -165,7 +165,11 @@
       "label": "Quiet hours:",
       "start": "Quiet from",
       "end": "Quiet until"
-    }
+    },
+    "sound": "Sound and movement",
+    "sounds": "Sounds",
+    "music": "Music",
+    "creditsOwn": "Extra pixels, music and sounds were made for this game by Claude Code and are public domain (CC0) too."
   },
   "tutorial": {
     "skip": "Skip",

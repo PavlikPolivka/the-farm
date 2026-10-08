@@ -8,7 +8,7 @@ import { FarmScene } from './scenes/FarmScene.js';
 import { toast } from './ui/effects.js';
 import { Ui } from './ui/index.js';
 import * as minigame from './minigames/frame.js';
-import { prefersReducedMotion, setReducedMotion } from './ui/prefs.js';
+import { prefersReducedMotion } from './ui/prefs.js';
 import './style.css';
 
 declare global {
@@ -22,7 +22,8 @@ registerSW({ immediate: true });
 
 async function boot(): Promise<void> {
   await initI18n();
-  setReducedMotion(prefersReducedMotion());
+  // Only the class: the OS setting is followed until the player picks one in Settings.
+  document.documentElement.classList.toggle('reduced-motion', prefersReducedMotion());
   const { store, awayMs, away } = await Store.open();
   const sync = new Sync(store);
   const ui = new Ui(store, sync);

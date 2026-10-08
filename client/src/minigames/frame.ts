@@ -1,3 +1,4 @@
+import { sfx } from '../audio.js';
 import { GAMES, GameSession, formatNumber, type GameId, type PlayResult } from '@pixel-farm/shared';
 import { locale, t } from '../i18n/index.js';
 import { h, sprite } from '../ui/dom.js';
@@ -109,6 +110,7 @@ export function playGame(opts: PlayOptions): void {
     const board = BOARDS[opts.game]((m) => {
       const ok = session.move(m, now());
       board.draw(session.state, now());
+      sfx(ok ? 'pop' : 'error');
       return ok;
     }, effects);
     body.replaceChildren(board.el);
@@ -139,6 +141,7 @@ export function playGame(opts: PlayOptions): void {
     current = null;
     const result = session.result();
     score.textContent = fmt(result.score);
+    sfx(result.done ? 'win' : 'coin');
     const lines = h('div', { class: 'mg-lines' }, h('p', null, t('play.saving')));
     const buttons = h('div', { class: 'choices mg-buttons' });
     body.replaceChildren(

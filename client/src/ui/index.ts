@@ -31,6 +31,7 @@ import { ITEM_SPRITE, buildSheet, type Sheet, type SheetKind } from './sheets.js
 import { FamilyBar } from './social.js';
 import { inboxSheet } from './inbox.js';
 import { itemName } from './book.js';
+import { sfx, type Sfx } from '../audio.js';
 import { Visit } from './visit.js';
 import { Tutorial } from './tutorial.js';
 
@@ -197,9 +198,11 @@ export class Ui {
       },
     });
     this.sheet = sheet;
+    // Switching tabs re-renders the open sheet: only slide in when it first opens.
+    const again = !this.sheetEl.hidden;
     const panel = h(
       'div',
-      { class: 'panel', data: { sheet: kind } },
+      { class: again ? 'panel still' : 'panel', data: { sheet: kind } },
       h('div', { class: 'panel-head' }, sprite(sheet.icon, 2), h('h2', null, sheet.title), h('button', { class: 'close', 'aria-label': t('common.close'), on: { click: () => this.close() } }, '✕')),
       h('div', { class: 'panel-body' }, sheet.body),
     );
@@ -297,6 +300,8 @@ export class Ui {
   private onEvents(events: SimEvent[]): void {
     this.dirty = true;
     for (const e of events) {
+      const sound = soundFor(e);
+      if (sound) sfx(sound);
       if (e.type === 'levelUp') {
         const names = e.unlocks.map(unlockName).filter(Boolean).join(', ');
         toast(t('toast.levelUp', { level: e.level }) + (names ? ` ${t('toast.unlocked', { list: names })}` : ''), 'star', 4000);
@@ -323,6 +328,7 @@ export class Ui {
     if (!before || tiers.filter((n, i) => n > Number(before[i])).length > 3) return;
     ACHIEVEMENT_IDS.forEach((id, i) => {
       const was = Number(before[i]);
+      if (tiers[i]! > was) sfx('medal');
       if (tiers[i]! > was) toast(t('toast.medal', { name: t(`book.ach.${id}.name`), medal: t(`book.tiers.${tiers[i]}`) }), `medal-${['', 'bronze', 'silver', 'gold'][tiers[i]!]}`, 4000);
     });
   }
@@ -445,6 +451,28 @@ export class Ui {
       ),
     );
     document.body.append(modal);
+  }
+}
+
+/** Sounds for what the player did; idle production (farmhands, animals, the mill) stays quiet. */
+function soundFor(e: SimEvent): Sfx | null {
+  switch (e.type) {
+    case 'coins':
+      return e.source === 'tap' ? 'tap' : e.source === 'sell' || e.source === 'order' ? 'coin' : null;
+    case 'harvest':
+      return e.auto ? null : 'harvest';
+    case 'bought':
+      return 'buy';
+    case 'levelUp':
+      return 'level';
+    case 'found':
+      return 'found';
+    case 'prestige':
+      return 'prestige';
+    case 'fail':
+      return 'error';
+    default:
+      return null;
   }
 }
 

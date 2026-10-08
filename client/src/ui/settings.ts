@@ -4,6 +4,7 @@ import { locale, setLocale, t } from '../i18n/index.js';
 import { enablePush, pushState, sendTestPush } from '../push.js';
 import { h, sprite } from './dom.js';
 import { prefersReducedMotion, setReducedMotion } from './prefs.js';
+import { audio } from '../audio.js';
 
 export interface SettingsHooks {
   onLocaleChange(): void;
@@ -27,12 +28,31 @@ export function renderSettings(body: HTMLElement, hooks: SettingsHooks): () => v
     on: { click: () => { setReducedMotion(!prefersReducedMotion()); update(); } },
   });
 
+  const toggle = (key: string, on: () => boolean, set: (v: boolean) => void) => {
+    const b = h('button', { class: 'choice toggle', role: 'switch', data: { toggle: key }, on: { click: () => { set(!on()); update(); } } });
+    return { b, update: () => { b.setAttribute('aria-checked', String(on())); b.textContent = (on() ? '✔ ' : '') + t(`settings.${key}`); b.classList.toggle('active', on()); } };
+  };
+  const soundT = toggle('sounds', () => audio.sound, (v) => audio.setSound(v));
+  const musicT = toggle('music', () => audio.music, (v) => audio.setMusic(v));
+
   const account = h('p', { class: 'desc' });
   const syncLine = h('p', { class: 'desc sync', 'data-testid': 'sync-status' });
   const login = h('button', { class: 'primary', on: { click: () => location.assign('/auth/login') } }, t('settings.login'));
   const logout = h('button', { on: { click: async () => { await fetch('/auth/logout', { method: 'POST' }); await hooks.refreshMe(); update(); } } }, t('settings.logout'));
 
   const pushHint = h('p', { class: 'desc' });
+
+  // Credits: every art pack with its licence (credits.json is written by the asset build).
+  const credits = h('div', { class: 'credits', 'data-testid': 'credits' }, h('p', { class: 'desc' }, t('settings.creditsText')));
+  void fetch('/credits.json')
+    .then((r) => (r.ok ? (r.json() as Promise<{ name: string; url: string; license: string }[]>) : []))
+    .then((list) =>
+      credits.append(
+        h('ul', { class: 'desc' }, ...list.map((c) => h('li', null, h('a', { href: c.url, target: '_blank', rel: 'noopener' }, c.name), ` (${c.license})`))),
+        h('p', { class: 'desc' }, t('settings.creditsOwn')),
+      ),
+    )
+    .catch(() => {});
 
   // What to be told about, and when not to be disturbed.
   let prefs: PushPrefs | null = null;
@@ -89,14 +109,16 @@ export function renderSettings(body: HTMLElement, hooks: SettingsHooks): () => v
 
   body.append(
     section('sign', t('settings.language'), h('div', { class: 'choices' }, langBtn('cs', 'Čeština'), langBtn('en', 'English'))),
-    section('sparkle', t('settings.motion'), motion),
+    section('sparkle', t('settings.sound'), h('div', { class: 'choices' }, soundT.b, musicT.b), motion),
     section('farmhand', t('settings.account'), account, syncLine, h('div', { class: 'choices' }, login, logout)),
     section('star', t('settings.notifications'), pushHint, h('div', { class: 'choices' }, pushOn, pushTest), prefsBox),
     section('hand', t('settings.tutorial'), h('button', { on: { click: () => hooks.restartTutorial() } }, t('settings.tutorial'))),
-    section('barn-icon', t('settings.credits'), h('p', { class: 'desc' }, t('settings.creditsText')), h('p', { class: 'desc version' }, `v${APP_VERSION}`)),
+    section('barn-icon', t('settings.credits'), credits, h('p', { class: 'desc version' }, `v${APP_VERSION}`)),
   );
 
   const update = () => {
+    soundT.update();
+    musicT.update();
     const reduced = prefersReducedMotion();
     motion.setAttribute('aria-checked', String(reduced));
     motion.textContent = reduced ? '✔ ' + t('settings.motion') : t('settings.motion');

@@ -187,6 +187,7 @@ button { font: inherit; color: inherit; cursor: pointer; }
 }
 .modal .panel { max-width: 420px; border-bottom: 4px solid var(--outline); border-radius: 10px; }
 @keyframes slide-up { from { transform: translateY(30px); opacity: 0.4; } }
+.panel.still { animation: none; }
 .panel-head {
   display: flex;
   align-items: center;

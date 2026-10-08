@@ -18,6 +18,6 @@ export default defineConfig({
     command: 'node server/dist/index.js',
     port: PORT,
     reuseExistingServer: !process.env.CI,
-    env: { PORT: String(PORT), STATIC_DIR: 'client/dist', DB_PATH: ':memory:', NODE_ENV: 'test', DEV_LOGIN: '1' },
+    env: { PORT: String(PORT), STATIC_DIR: 'client/dist', DB_PATH: ':memory:', BACKUP_DIR: 'off', NODE_ENV: 'test', DEV_LOGIN: '1' },
   },
 });

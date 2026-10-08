@@ -1,3 +1,4 @@
+import { sfx } from '../audio.js';
 import type { Inbox, InboxGift, InboxPrize, PrizeClaim } from '@pixel-farm/shared';
 import type { Store } from '../game/store.js';
 import type { Sync } from '../game/sync.js';
@@ -46,6 +47,7 @@ export function inboxSheet(ctx: { store: Store; sync: Sync; onChange(): void }):
     const res = await fetch(`/api/gifts/${g.id}/claim`, { method: 'POST' }).catch(() => null);
     if (!res?.ok) return false;
     ctx.store.dispatch({ type: 'giftClaim', gift: g.gift });
+    sfx('gift');
     return true;
   };
 
@@ -54,6 +56,7 @@ export function inboxSheet(ctx: { store: Store; sync: Sync; onChange(): void }):
     if (!res?.ok) return false;
     const { seq, prize } = (await res.json()) as PrizeClaim;
     ctx.store.dispatch({ type: 'prize', id: seq, prize });
+    sfx('gift');
     return true;
   };
 

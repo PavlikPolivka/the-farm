@@ -3,6 +3,7 @@ import { loadConfig } from './config.js';
 import { openDb } from './db.js';
 import { runJobs } from './notify.js';
 import { awardPrizes } from './prizes.js';
+import { nightlyBackup } from './backup.js';
 import { sendToUser } from './push.js';
 
 const cfg = loadConfig();
@@ -21,6 +22,10 @@ const ticker = setInterval(() => {
   } catch (err) {
     app.log.error({ err }, 'awarding prizes failed');
   }
+  if (cfg.backup)
+    nightlyBackup(db, cfg.backup, Date.now())
+      .then((file) => file && app.log.info({ file }, 'nightly backup written'))
+      .catch((err: unknown) => app.log.error({ err }, 'nightly backup failed'));
   if (cfg.vapid)
     runJobs(db, Date.now(), (userId, msg) => sendToUser(db, userId, msg)).catch((err: unknown) => app.log.error({ err }, 'push jobs failed'));
 }, 60_000);

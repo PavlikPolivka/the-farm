@@ -18,6 +18,8 @@ export interface Config {
   devFakeUser: string | null;
   /** Dev/test-only: GET /auth/dev?as=name logs in as that player (for e2e). Ignored in production. */
   devLogin: boolean;
+  /** Nightly snapshot: folder (null = off), how many to keep, Prague time "HH:MM". */
+  backup: { dir: string; keep: number; at: string } | null;
 }
 
 export function loadConfig(env: NodeJS.ProcessEnv = process.env): Config {
@@ -52,6 +54,15 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): Config {
     adminGroups: list(env.ADMIN_GROUPS, ['pixel-farm-admin']),
     devFakeUser: !production && env.DEV_FAKE_USER ? env.DEV_FAKE_USER : null,
     devLogin: !production && env.DEV_LOGIN === '1',
+    // An in-memory database (tests) has nothing worth keeping.
+    backup:
+      env.BACKUP_DIR === 'off' || env.DB_PATH === ':memory:'
+        ? null
+        : {
+            dir: resolve(env.BACKUP_DIR ?? resolve(env.DB_PATH ?? './data/farm.db', '..', 'backups')),
+            keep: Math.max(1, Number(env.BACKUP_KEEP ?? 14)),
+            at: /^([01]\d|2[0-3]):[0-5]\d$/.test(env.BACKUP_AT ?? '') ? env.BACKUP_AT! : '02:30',
+          },
   };
 }
 

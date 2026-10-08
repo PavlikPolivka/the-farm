@@ -40,6 +40,40 @@ Zero Trust → Networks → Tunnels → (tunnel) → Public Hostname → Add:
 
 Then `curl -s https://farm.ppolivka.com/healthz` should return `{"ok":true,...}`.
 
+## Nightly backup to the NAS (M6)
+
+The server writes `data/backups/farm-YYYY-MM-DD.db` every night at 02:30 Prague: a consistent SQLite
+snapshot, with the newest 14 kept. To copy each one to the OMV NAS, run once:
+
+```sh
+sudo bash /opt/pixel-farm/nas-backup-setup.sh
+```
+
+It adds an on-demand mount of `//192.168.0.127/nas` at `/mnt/nas-backup`, using the Jellyfin
+credentials file. The Jellyfin mount itself is untouched, and `/etc/fstab` is backed up first.
+It also installs a `pixel-farm-nas-backup.timer` that copies the newest snapshot to
+`backups/pixel-farm/` on the share at 03:30 and keeps 30 there. The script ends with a test run.
+
+To restore: stop the container, copy a snapshot over `data/farm.db`, delete `farm.db-wal` and
+`farm.db-shm`, then start the container again.
+
+## Nightly backup to the NAS (M6)
+
+The server writes `data/backups/farm-YYYY-MM-DD.db` every night at 02:30 Prague: a consistent SQLite
+snapshot, with the newest 14 kept. To copy each one to the OMV NAS, run once:
+
+```sh
+sudo bash /opt/pixel-farm/nas-backup-setup.sh
+```
+
+It adds an on-demand mount of `//192.168.0.127/nas` at `/mnt/nas-backup`, using the Jellyfin
+credentials file. The Jellyfin mount itself is untouched, and `/etc/fstab` is backed up first.
+It also installs a `pixel-farm-nas-backup.timer` that copies the newest snapshot to
+`backups/pixel-farm/` on the share at 03:30 and keeps 30 there. The script ends with a test run.
+
+To restore: stop the container, copy a snapshot over `data/farm.db`, delete `farm.db-wal` and
+`farm.db-shm`, then start the container again.
+
 ## Updating later
 ```sh
 cd /opt/pixel-farm && docker compose pull && docker compose up -d
