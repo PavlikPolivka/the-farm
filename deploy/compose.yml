@@ -1,0 +1,20 @@
+# Lives at /opt/pixel-farm/compose.yml on the homelab.
+services:
+  pixel-farm:
+    image: ghcr.io/pavlikpolivka/the-farm:latest
+    container_name: pixel-farm
+    restart: unless-stopped
+    env_file: .env
+    volumes:
+      - ./data:/data
+    expose:
+      - "3000"
+    # If Caddy runs on the host rather than in Docker, publish on loopback instead:
+    # ports:
+    #   - "127.0.0.1:3000:3000"
+    networks:
+      - portal
+
+networks:
+  portal:
+    external: true

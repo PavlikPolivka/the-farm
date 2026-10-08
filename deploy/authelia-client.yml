@@ -1,0 +1,32 @@
+# Merge into Authelia's configuration.yml under identity_providers.oidc.clients.
+# Written for Authelia 4.38+/4.39 syntax. Check every key against the docs for the version
+# actually deployed (`authelia --version`) before applying:
+#   https://www.authelia.com/configuration/identity-providers/openid-connect/clients/
+#
+# Generate the secret pair (put the plain text in /opt/pixel-farm/.env as OIDC_CLIENT_SECRET,
+# and the digest below):
+#   docker run --rm authelia/authelia:latest authelia crypto hash generate pbkdf2 --variant sha512 --random --random.length 64 --random.charset alphanumeric
+identity_providers:
+  oidc:
+    clients:
+      - client_id: 'pixel-farm'
+        client_name: 'Pixel Farm'
+        client_secret: '$pbkdf2-sha512$310000$REPLACE_WITH_DIGEST'
+        public: false
+        # The kid has no second factor. The app itself only admits groups pixel-farm / pixel-farm-admin.
+        authorization_policy: 'one_factor'
+        consent_mode: 'implicit'
+        require_pkce: true
+        pkce_challenge_method: 'S256'
+        redirect_uris:
+          - 'https://farm.ppolivka.com/auth/callback'
+        scopes:
+          - 'openid'
+          - 'profile'
+          - 'groups'
+        response_types:
+          - 'code'
+        grant_types:
+          - 'authorization_code'
+        token_endpoint_auth_method: 'client_secret_basic'
+        userinfo_signed_response_alg: 'none'

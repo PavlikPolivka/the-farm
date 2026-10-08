@@ -1,0 +1,8 @@
+# Add above the catch-all rule in the tunnel's config.yml (or as a Public Hostname in the
+# Zero Trust dashboard if the tunnel is remotely managed). Point it at Caddy the same way
+# the existing *.ppolivka.com hostnames are pointed.
+ingress:
+  - hostname: farm.ppolivka.com
+    service: https://caddy:443          # match the existing entries
+    originRequest:
+      originServerName: farm.ppolivka.com

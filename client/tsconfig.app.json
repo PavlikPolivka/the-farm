@@ -1,0 +1,14 @@
+{
+  "extends": "../tsconfig.base.json",
+  "compilerOptions": {
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
+    "lib": ["ES2022", "DOM", "DOM.Iterable"],
+    "types": ["vite/client", "vite-plugin-pwa/client"],
+    "emitDeclarationOnly": true,
+    "outDir": "../node_modules/.tsc/client-app",
+    "tsBuildInfoFile": "../node_modules/.tsc/client-app.tsbuildinfo"
+  },
+  "include": ["src", "vite.config.ts"],
+  "references": [{ "path": "../shared" }]
+}

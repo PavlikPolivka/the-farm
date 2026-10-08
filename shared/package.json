@@ -1,0 +1,20 @@
+{
+  "name": "@pixel-farm/shared",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
+  },
+  "scripts": {
+    "build": "tsc -b"
+  },
+  "devDependencies": {
+    "vitest": "^5.0.3"
+  },
+  "files": [
+    "dist"
+  ]
+}

@@ -1,0 +1,13 @@
+{
+  "extends": "../tsconfig.base.json",
+  "compilerOptions": {
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
+    "lib": ["ES2022", "WebWorker"],
+    "types": [],
+    "emitDeclarationOnly": true,
+    "outDir": "../node_modules/.tsc/client-sw",
+    "tsBuildInfoFile": "../node_modules/.tsc/client-sw.tsbuildinfo"
+  },
+  "include": ["sw"]
+}
