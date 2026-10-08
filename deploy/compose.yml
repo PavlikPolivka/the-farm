@@ -14,6 +14,11 @@ services:
     #   - "127.0.0.1:3000:3000"
     networks:
       - portal
+    # Public resolvers, so a router DNS outage can't block logins (the server must reach
+    # auth.ppolivka.com). Container names on `portal` still resolve through Docker.
+    dns:
+      - 1.1.1.1
+      - 8.8.8.8
 
 networks:
   portal:
