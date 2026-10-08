@@ -154,7 +154,17 @@
     "pushSent": "Odesláno. Za chvilku dorazí.",
     "tutorial": "Ukázat průvodce znovu",
     "credits": "Poděkování",
-    "creditsText": "Grafika: Kenney.nl (CC0). Pár pixelů navíc ve stejných barvách."
+    "creditsText": "Grafika: Kenney.nl (CC0). Pár pixelů navíc ve stejných barvách.",
+    "push": {
+      "gift": "Dárky",
+      "visit": "Návštěvy",
+      "ready": "Zralá úroda"
+    },
+    "quiet": {
+      "label": "Klid:",
+      "start": "Klid od",
+      "end": "Klid do"
+    }
   },
   "tutorial": {
     "skip": "Přeskočit",
@@ -274,5 +284,39 @@
     },
     "again": "Hrát znovu",
     "close": "Hotovo"
+  },
+  "stickers": {
+    "heart": "Srdíčko",
+    "flower": "Kytička",
+    "sun": "Sluníčko",
+    "smile": "Úsměv",
+    "star": "Hvězdička",
+    "cow": "Kravička"
+  },
+  "visit": {
+    "title": "Farma: {name}",
+    "home": "Domů",
+    "leaveSticker": "Nech tu nálepku:",
+    "stickerSent": "{name} tvou nálepku uvidí.",
+    "gift": "Poslat dárek",
+    "noGifts": "Dnes už žádné dárky",
+    "giftFor": "Dárek pro: {name}",
+    "giftRules": "{left, plural, one {Dnes ještě # dárek} few {Dnes ještě # dárky} other {Dnes ještě # dárků}}. Jeden dárek může mít hodnotu až {cap} mincí.",
+    "flower": "Kytička",
+    "send": "Poslat",
+    "giftSent": "Dárek odeslán: {name}!",
+    "giftFailed": "Dárek se nepodařilo poslat. Zkus to znovu."
+  },
+  "inbox": {
+    "title": "Schránka",
+    "gifts": "Dárky",
+    "visits": "Návštěvy",
+    "noGifts": "Teď tu žádné dárky nejsou.",
+    "noVisits": "Tento týden tu zatím nikdo nebyl.",
+    "claim": "Vzít",
+    "claimAll": "Vzít vše",
+    "claimed": "{count, plural, one {Dárek je ve stodole!} few {# dárky jsou ve stodole!} other {# dárků je ve stodole!}}",
+    "from": "od: {name}",
+    "visited": "Přišel/přišla: {name}"
   }
 }

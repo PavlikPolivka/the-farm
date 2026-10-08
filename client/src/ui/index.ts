@@ -25,6 +25,8 @@ import { buzz } from './prefs.js';
 import { renderSettings } from './settings.js';
 import { ITEM_SPRITE, buildSheet, type Sheet, type SheetKind } from './sheets.js';
 import { FamilyBar } from './social.js';
+import { inboxSheet } from './inbox.js';
+import { Visit } from './visit.js';
 import { Tutorial } from './tutorial.js';
 
 const FAIL_TOAST: Partial<Record<FailReason, string>> = { coins: 'toast.coins', locked: 'toast.locked', items: 'toast.items' };
@@ -51,6 +53,7 @@ export class Ui {
   private sheetEl = h('div', { class: 'sheet', hidden: true, role: 'dialog', 'aria-modal': 'true' });
   private bar = h('nav', { class: 'bar' });
   private family: FamilyBar;
+  private visit: Visit;
 
   constructor(
     private store: Store,
@@ -67,7 +70,17 @@ export class Ui {
       () => this.open('boards'),
       () => this.open('settings'),
       () => (this.sheetKind === 'settings' ? this.close() : this.open('settings')),
+      (m) => {
+        this.close();
+        void this.visit.open(m);
+      },
+      () => (this.sheetKind === 'inbox' ? this.close() : this.open('inbox')),
     );
+    this.visit = new Visit(store, sync, () => this.scene, (on) => {
+      this.family.visiting = on ? (this.visit.member?.id ?? null) : null;
+      this.family.render();
+      this.tutorial.pause(on);
+    });
     this.mount();
     this.tutorial = new Tutorial(store, () => this.scene, () => this.sheetKind);
     this.tutorial.render();
@@ -162,6 +175,7 @@ export class Ui {
         }),
       me: () => this.sync.me,
       login: () => location.assign('/auth/login'),
+      inbox: () => inboxSheet({ store: this.store, sync: this.sync, onChange: () => void this.family.refresh(true) }),
       games: {
         me: () => this.sync.me,
         login: () => location.assign('/auth/login'),

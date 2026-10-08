@@ -14,6 +14,8 @@ import {
 import { requireUser } from './auth.js';
 import type { DB } from './db.js';
 import { granted } from './games.js';
+import { planReady } from './notify.js';
+import { giftsClaimedValue } from './social.js';
 
 interface SaveRow {
   version: number;
@@ -75,13 +77,14 @@ export function registerSaves(app: FastifyInstance, db: DB, clock: () => number 
       if (body.baseVersion !== version) return { code: 409, body: { version, state: current?.state ?? null } satisfies SaveResponse };
 
       const now = clock();
-      const verdict = checkSave(current?.state ?? null, next, now, granted(db, userId));
+      const verdict = checkSave(current?.state ?? null, next, now, { ...granted(db, userId), giftValue: giftsClaimedValue(db, userId) });
       if (!verdict.ok) {
         req.log.warn({ userId, reason: verdict.reason }, 'save rejected');
         return { code: 422, body: { error: 'rejected', reason: verdict.reason, version, state: current?.state ?? null } };
       }
       if (verdict.clamped.length) req.log.warn({ userId, clamped: verdict.clamped }, 'save clamped');
       storeSave(db, userId, version + 1, current?.state ?? null, verdict.state, now);
+      planReady(db, userId, verdict.state, now);
       const accepted: SaveAccepted = { version: version + 1, clamped: verdict.clamped };
       if (verdict.clamped.length) accepted.state = verdict.state;
       return { code: 200, body: accepted };

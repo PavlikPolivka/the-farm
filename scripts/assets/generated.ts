@@ -473,6 +473,139 @@ function egg(i: number): SpriteDef {
 }
 const EGGS = [0, 1, 2, 3].map(egg);
 
+/** M4: stickers, the gift box and the inbox envelope. */
+const STICKER_HEART: SpriteDef = {
+  name: 'sticker-heart',
+  rows: [
+    '................',
+    '................',
+    '..kkkk....kkkk..',
+    '.krrrrk..krrrrk.',
+    'krWWrrrkkrrrrrRk',
+    'krWrrrrrrrrrrrRk',
+    'krrrrrrrrrrrrrRk',
+    'krrrrrrrrrrrrrRk',
+    '.krrrrrrrrrrrRk.',
+    '..krrrrrrrrrRk..',
+    '...krrrrrrrRk...',
+    '....krrrrrRk....',
+    '.....krrrRk.....',
+    '......krRk......',
+    '.......kk.......',
+    '................',
+  ],
+};
+
+const STICKER_FLOWER: SpriteDef = {
+  name: 'sticker-flower',
+  rows: [
+    '................',
+    '......kkkk......',
+    '.....kWWWWk.....',
+    '..kkkkWWWWkkkk..',
+    '.kWWWkwWWwkWWWk.',
+    '.kWWWWkkkkWWWWk.',
+    '.kwWWkyyyykWWwk.',
+    '..kkkkyYyykkkk..',
+    '..kkkkyyYykkkk..',
+    '.kwWWkyyyykWWwk.',
+    '.kWWWWkkkkWWWWk.',
+    '.kWWWkwWWwkWWWk.',
+    '..kkkkWWWWkkkk..',
+    '.....kNnnk......',
+    '.....kNnk.......',
+    '......kk........',
+  ],
+};
+
+const STICKER_SUN: SpriteDef = {
+  name: 'sticker-sun',
+  rows: [
+    '.......kk.......',
+    '...k...yy...k...',
+    '....k..yy..k....',
+    '.....kkkkkk.....',
+    '....kyyyyyyk....',
+    'yy.kyyyyyyyyk.yy',
+    '..kyyykyykyyyk..',
+    '..kyyykyykyyyk..',
+    '..kyyyyyyyyyyk..',
+    '..kyyykyyykyyk..',
+    'yy.kyyykkkyyk.yy',
+    '....kyyyyyyk....',
+    '.....kkkkkk.....',
+    '....k..yy..k....',
+    '...k...yy...k...',
+    '.......kk.......',
+  ],
+};
+
+const STICKER_SMILE: SpriteDef = {
+  name: 'sticker-smile',
+  rows: [
+    '................',
+    '.....kkkkkk.....',
+    '...kkyyyyyykk...',
+    '..kyyyyyyyyyyk..',
+    '.kyyyyyyyyyyyyk.',
+    '.kyyykyyyykyyyk.',
+    'kyyyykyyyykyyyyk',
+    'kyyyykyyyykyyyyk',
+    'kyyyyyyyyyyyyyyk',
+    'kyyrryyyyyyrryyk',
+    'kyyykyyyyyykyyyk',
+    '.kyyykkkkkkyyyk.',
+    '.kyyyyyyyyyyyyk.',
+    '..kyyyyyyyyyyk..',
+    '...kkyyyyyykk...',
+    '.....kkkkkk.....',
+  ],
+};
+
+const GIFT: SpriteDef = {
+  name: 'gift',
+  rows: [
+    '................',
+    '....kk....kk....',
+    '...krRk..kRrk...',
+    '...kRrRkkRrRk...',
+    '....kkRRRRkk....',
+    '.kkkkkkrrkkkkkk.',
+    '.kSSSSkrrkSSSSk.',
+    '.kSSSSkrrkSSSSk.',
+    '.kkkkkkrrkkkkkk.',
+    '..kSSSkrrkSSSk..',
+    '..kSsSkrrkSsSk..',
+    '..kSSSkrrkSSSk..',
+    '..kSSSkrrkSSSk..',
+    '..kSSSkrrkSSSk..',
+    '..kkkkkkkkkkkk..',
+    '................',
+  ],
+};
+
+const MAIL: SpriteDef = {
+  name: 'mail',
+  rows: [
+    '................',
+    '................',
+    '................',
+    '.kkkkkkkkkkkkkk.',
+    '.kWkwwwwwwwwkWk.',
+    '.kwWkwwwwwwkWwk.',
+    '.kwwWkwwwwkWwwk.',
+    '.kwwwWkwwkWwwwk.',
+    '.kwwwwWkkWwwwwk.',
+    '.kwwwwkWWkwwwwk.',
+    '.kwwwkwwwwkwwwk.',
+    '.kwwkwwwwwwkwwk.',
+    '.kwkwwwwwwwwkwk.',
+    '.kkkkkkkkkkkkkk.',
+    '................',
+    '................',
+  ],
+};
+
 export const GENERATED: SpriteDef[] = [
   WINDMILL,
   windmillSails(),
@@ -493,6 +626,12 @@ export const GENERATED: SpriteDef[] = [
   CARD_BACK,
   ...PIPES,
   ...EGGS,
+  STICKER_HEART,
+  STICKER_FLOWER,
+  STICKER_SUN,
+  STICKER_SMILE,
+  GIFT,
+  MAIL,
 ];
 
 export function assertValid(def: SpriteDef, keys: readonly string[]): void {

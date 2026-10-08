@@ -72,6 +72,19 @@ export class FarmScene extends Phaser.Scene {
   private layoutKey = '';
   /** True once create() has run and taps are handled. */
   ready = false;
+  /** Someone else's farm being visited: drawn instead of ours, and taps do nothing. */
+  private visiting: FarmState | null = null;
+
+  private get farm(): FarmState {
+    return this.visiting ?? this.store.state;
+  }
+
+  /** Shows another player's farm read-only, or ours again with null. */
+  view(state: FarmState | null): void {
+    this.visiting = state;
+    this.setScroll(0);
+    this.rebuild();
+  }
 
   constructor() {
     super('farm');
@@ -132,7 +145,7 @@ export class FarmScene extends Phaser.Scene {
   }
 
   update(_time: number, delta: number): void {
-    const s = this.store.state;
+    const s = this.farm;
     // Field count, land or animal herd changed: rebuild the static layout.
     const key = `${s.fields.length}:${s.land}:${ANIMAL_IDS.map((a) => (s.animals[a].count ? 1 : 0)).join('')}`;
     if (key !== this.layoutKey) this.rebuild();
@@ -157,7 +170,7 @@ export class FarmScene extends Phaser.Scene {
     if (target === 'pen') return at(PEN.x + 16, PEN.y + 20);
     if (target === 'land') return at(W / 2, this.landRowY() + 8);
     const i = Number(target.split(':')[1]);
-    if (!(i < this.store.state.fields.length)) return null;
+    if (!(i < this.farm.fields.length)) return null;
     const { x, y } = fieldPos(i);
     return at(x + 8, y + 8);
   }
@@ -180,18 +193,19 @@ export class FarmScene extends Phaser.Scene {
   }
 
   private worldHeight(): number {
-    return this.landRowY() + (landLevel(this.store.state) === null ? 0 : 24) + 8;
+    return this.landRowY() + (landLevel(this.farm) === null ? 0 : 24) + 8;
   }
 
   private landRowY(): number {
-    return FIELDS_Y0 + this.store.state.land * FIELD_PITCH_Y;
+    return FIELDS_Y0 + this.farm.land * FIELD_PITCH_Y;
   }
 
   private handleTap(px: number, py: number): void {
+    if (this.visiting) return;
     const lx = (px - this.ox) / this.S;
     const ly = (py + this.cameras.main.scrollY) / this.S;
     const inside = (r: { x: number; y: number; w: number; h: number }) => lx >= r.x && lx < r.x + r.w && ly >= r.y && ly < r.y + r.h;
-    const s = this.store.state;
+    const s = this.farm;
     for (let i = 0; i < s.fields.length; i++) {
       const { x, y } = fieldPos(i);
       if (inside({ x: x - FIELD_HIT_PAD, y: y - FIELD_HIT_PAD, w: 16 + 2 * FIELD_HIT_PAD, h: 16 + 2 * FIELD_HIT_PAD })) {
@@ -211,7 +225,7 @@ export class FarmScene extends Phaser.Scene {
   }
 
   private rebuild(): void {
-    const s = this.store.state;
+    const s = this.farm;
     const { width, height } = this.scale.gameSize;
     this.S = Math.max(2, Math.min(6, Math.floor(width / W)));
     this.ox = Math.floor((width - W * this.S) / 2);

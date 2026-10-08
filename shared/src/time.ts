@@ -35,3 +35,33 @@ export const dayNumber = (day: string) => Math.round(Date.parse(`${day}T00:00:00
 
 /** The day before a day key ("2026-10-01" → "2026-09-30"). */
 export const prevDay = (day: string) => iso(Date.parse(`${day}T00:00:00Z`) - DAY_MS);
+
+/** Minutes since midnight in Prague. */
+export function pragueMinutes(ms: number): number {
+  const p = Object.fromEntries(clockParts.formatToParts(ms).map((x) => [x.type, x.value]));
+  return (Number(p.hour) % 24) * 60 + Number(p.minute);
+}
+
+const clockParts = new Intl.DateTimeFormat('en-GB', { timeZone: GAME.timeZone, hour: '2-digit', minute: '2-digit', hourCycle: 'h23' });
+
+const toMinutes = (hhmm: string) => {
+  const [h, m] = hhmm.split(':').map(Number);
+  return (h ?? 0) * 60 + (m ?? 0);
+};
+
+/**
+ * The earliest moment at or after `ms` outside quiet hours ("20:00"–"08:00", Prague time,
+ * may wrap midnight). Equal start and end means no quiet hours.
+ */
+export function afterQuiet(ms: number, quiet: { start: string; end: string } | null): number {
+  if (!quiet) return ms;
+  const start = toMinutes(quiet.start);
+  const end = toMinutes(quiet.end);
+  if (start === end) return ms;
+  const now = pragueMinutes(ms);
+  const inQuiet = start < end ? now >= start && now < end : now >= start || now < end;
+  if (!inQuiet) return ms;
+  const wait = (end - now + 1440) % 1440;
+  // Land on the minute the quiet hours end (DST shifts are absorbed by the next check).
+  return ms - (ms % 60_000) + wait * 60_000;
+}

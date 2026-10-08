@@ -44,10 +44,12 @@ export const PLAUSIBLE = {
   maxTapLevel: 200,
 } as const;
 
-/** Minigame rewards the server has granted this player, in total. */
+/** What the server has given this player in total: minigame rewards and claimed gifts. */
 export interface Granted {
   coins: number;
   xp: number;
+  /** Claimed gifts at base sell price. */
+  giftValue?: number;
 }
 
 export type Verdict =
@@ -83,7 +85,7 @@ const ITEM_IDS = [...CROP_IDS, ...GOOD_IDS] as const;
 export function parseSave(raw: unknown): FarmState {
   if (!isObj(raw)) fail('not an object');
   const r = raw as Record<string, unknown>;
-  if (r.v !== 1 && r.v !== 2) fail('version');
+  if (r.v !== 1 && r.v !== 2 && r.v !== 3) fail('version');
   const land = int(r.land, 'land', 1, ECONOMY.maxLand);
 
   if (!Array.isArray(r.fields) || r.fields.length < 1 || r.fields.length > land * ECONOMY.fieldsPerLand) fail('fields');
@@ -143,7 +145,7 @@ export function parseSave(raw: unknown): FarmState {
   const stats = r.stats as Record<string, unknown>;
 
   return {
-    v: 2,
+    v: 3,
     t: num(r.t, 't'),
     createdAt: num(r.createdAt, 'createdAt'),
     rng: int(r.rng, 'rng', -(2 ** 31), 2 ** 32),
@@ -171,6 +173,9 @@ export function parseSave(raw: unknown): FarmState {
       ordersDone: int(stats.ordersDone, 'stats.ordersDone'),
       rewardCoins: r.v === 1 ? 0 : num(stats.rewardCoins, 'stats.rewardCoins'),
       rewardXp: r.v === 1 ? 0 : num(stats.rewardXp, 'stats.rewardXp'),
+      giftValueIn: (r.v as number) < 3 ? 0 : num(stats.giftValueIn, 'stats.giftValueIn'),
+      giftValueOut: (r.v as number) < 3 ? 0 : num(stats.giftValueOut, 'stats.giftValueOut'),
+      flowers: (r.v as number) < 3 ? 0 : int(stats.flowers, 'stats.flowers'),
     },
   };
 }
@@ -292,6 +297,12 @@ export function checkSave(prev: FarmState | null, next: FarmState, now: number, 
     s.stats.rewardXp = Math.min(s.stats.rewardXp, granted.xp);
     clamped.push('rewards');
   }
+  if (s.stats.giftValueIn > (granted.giftValue ?? 0) + 1e-6) {
+    s.stats.giftValueIn = granted.giftValue ?? 0;
+    clamped.push('gifts');
+  }
+  // Claimed gifts land in the barn, which counts towards wealth at VALUE_MULT x base price.
+  const giftWealth = PLAUSIBLE.valueMult * Math.max(0, s.stats.giftValueIn - base.stats.giftValueIn);
   const rewardCoins = Math.max(0, s.stats.rewardCoins - base.stats.rewardCoins);
   const rewardXp = Math.max(0, s.stats.rewardXp - base.stats.rewardXp);
 
@@ -330,7 +341,7 @@ export function checkSave(prev: FarmState | null, next: FarmState, now: number, 
 
   // Wealth.
   const cap = maxCap(baseCap, capacity(s, levelOf(s.xp)));
-  const maxWealth = wealth(base) + rewardCoins + slack * (cap.rate * sec + cap.lump) + 50;
+  const maxWealth = wealth(base) + rewardCoins + giftWealth + slack * (cap.rate * sec + cap.lump) + 50;
   let excess = wealth(s) - maxWealth;
   if (excess > 0) {
     clamped.push('coins');

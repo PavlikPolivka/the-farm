@@ -46,6 +46,7 @@ import {
   unlocksAt,
 } from './rules.js';
 import { emptyField, newGame, TUTORIAL_DONE, type FarmState, type Order } from './state.js';
+import { giftValue, type Gift } from './social.js';
 
 export type Action =
   | { type: 'tap'; at: number }
@@ -61,7 +62,11 @@ export type Action =
   | { type: 'deliver'; at: number; order: number }
   | { type: 'tutorial'; at: number; step: number }
   /** A minigame reward granted by the server (ids increase per player). */
-  | { type: 'reward'; at: number; id: number; coins: number; xp: number };
+  | { type: 'reward'; at: number; id: number; coins: number; xp: number }
+  /** A gift the server accepted from this player: the items leave the barn. */
+  | { type: 'giftSend'; at: number; gift: Gift }
+  /** A gift this player claimed from the inbox. */
+  | { type: 'giftClaim'; at: number; gift: Gift };
 
 export type FailReason = 'coins' | 'locked' | 'max' | 'busy' | 'empty' | 'unripe' | 'items' | 'invalid';
 
@@ -216,6 +221,22 @@ export function apply(s: FarmState, a: Action): Result {
       s.stats.rewardXp += a.xp;
       events.push({ type: 'coins', amount: a.coins, source: 'minigame' });
       addXp(s, a.xp, events);
+      break;
+    }
+    case 'giftSend': {
+      if (a.gift.kind === 'flower') break;
+      if ((s.inv[a.gift.item] ?? 0) < a.gift.qty) return fail('items');
+      s.inv[a.gift.item] -= a.gift.qty;
+      s.stats.giftValueOut += giftValue(a.gift);
+      break;
+    }
+    case 'giftClaim': {
+      if (a.gift.kind === 'flower') {
+        s.stats.flowers++;
+        break;
+      }
+      s.inv[a.gift.item] += a.gift.qty;
+      s.stats.giftValueIn += giftValue(a.gift);
       break;
     }
     case 'tutorial': {

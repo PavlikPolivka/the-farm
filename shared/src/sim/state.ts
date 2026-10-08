@@ -38,7 +38,7 @@ export const TUTORIAL_DONE = TUTORIAL_STEPS.length;
 
 /** The whole single-player save. Plain JSON: no classes, no Dates. */
 export interface FarmState {
-  v: 2;
+  v: 3;
   /** Simulation clock, ms since epoch. */
   t: number;
   createdAt: number;
@@ -71,6 +71,11 @@ export interface FarmState {
     /** Minigame rewards received in total; the server checks them against what it granted. */
     rewardCoins: number;
     rewardXp: number;
+    /** Gifts claimed and sent, valued at base sell price; the server checks the claimed side. */
+    giftValueIn: number;
+    giftValueOut: number;
+    /** Flowers received: free gifts worth nothing, kept for fun (and M5's collections). */
+    flowers: number;
   };
 }
 
@@ -78,7 +83,7 @@ const zero = <K extends string>(keys: readonly K[]) => Object.fromEntries(keys.m
 
 export function newGame(now: number, seed: number): FarmState {
   const s: FarmState = {
-    v: 2,
+    v: 3,
     t: now,
     createdAt: now,
     rng: seed | 0,
@@ -99,7 +104,7 @@ export function newGame(now: number, seed: number): FarmState {
     lastCrop: 'wheat',
     tutorial: 0,
     lastRewardId: 0,
-    stats: { taps: 0, harvested: zero(CROP_IDS), produced: zero(GOOD_IDS), ordersDone: 0, rewardCoins: 0, rewardXp: 0 },
+    stats: { taps: 0, harvested: zero(CROP_IDS), produced: zero(GOOD_IDS), ordersDone: 0, rewardCoins: 0, rewardXp: 0, giftValueIn: 0, giftValueOut: 0, flowers: 0 },
   };
   return s;
 }
@@ -111,13 +116,20 @@ export function emptyField(): Field {
 /** Upgrades older saves to the current shape. Unknown future versions are rejected. */
 export function migrate(raw: unknown): FarmState {
   const s = raw as Omit<FarmState, 'v'> & { v: number };
-  if (!s || typeof s !== 'object' || (s.v !== 1 && s.v !== 2)) throw new Error('unsupported save version');
+  if (!s || typeof s !== 'object' || ![1, 2, 3].includes(s.v)) throw new Error('unsupported save version');
   if (s.v === 1) {
     // v2 (M3): minigame reward ledger.
     s.v = 2;
     s.lastRewardId = 0;
     s.stats.rewardCoins = 0;
     s.stats.rewardXp = 0;
+  }
+  if (s.v === 2) {
+    // v3 (M4): gifts.
+    s.v = 3;
+    s.stats.giftValueIn = 0;
+    s.stats.giftValueOut = 0;
+    s.stats.flowers = 0;
   }
   return s as FarmState;
 }

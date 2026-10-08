@@ -31,7 +31,7 @@ describe('parseSave', () => {
   it('drops unknown keys and rejects malformed saves', () => {
     const s = json(startGame(T0, 7)) as Record<string, unknown>;
     expect(parseSave({ ...s, extra: 'x' })).not.toHaveProperty('extra');
-    expect(() => parseSave({ ...s, v: 3 })).toThrow(/version/);
+    expect(() => parseSave({ ...s, v: 4 })).toThrow(/version/);
     expect(() => parseSave({ ...s, coins: -1 })).toThrow(/coins/);
     expect(() => parseSave({ ...s, coins: 'lots' })).toThrow(/coins/);
     expect(() => parseSave({ ...s, land: 99 })).toThrow(/land/);
@@ -138,7 +138,7 @@ describe('checkSave: doctored saves', () => {
     delete v1.lastRewardId;
     delete v1.stats.rewardCoins;
     delete v1.stats.rewardXp;
-    expect(parseSave(v1)).toMatchObject({ v: 2, lastRewardId: 0, stats: { rewardCoins: 0, rewardXp: 0 } });
+    expect(parseSave(v1)).toMatchObject({ v: 3, lastRewardId: 0, stats: { rewardCoins: 0, rewardXp: 0, giftValueIn: 0, flowers: 0 } });
   });
 
   it('assetSpend matches what the engine charged', () => {

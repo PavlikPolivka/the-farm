@@ -1,4 +1,5 @@
 import { BOARD_IDS, formatNumber, type Board, type BoardId, type BoardRow, type FamilyMember, type Me } from '@pixel-farm/shared';
+import { fetchInbox, inboxCount } from './inbox.js';
 import { locale, t } from '../i18n/index.js';
 import { clear, h, sprite } from './dom.js';
 import type { Sheet } from './sheets.js';
@@ -29,12 +30,17 @@ export class FamilyBar {
   readonly el = h('nav', { class: 'family', 'aria-label': t('family.title') });
   private members: FamilyMember[] = [];
   private lastFetch = 0;
+  private unread = 0;
+  /** Who is being visited, highlighted in the bar. */
+  visiting: number | null = null;
 
   constructor(
     private me: () => Me | null,
     private open: () => void,
     private login: () => void,
     private settings: () => void,
+    private visit: (m: FamilyMember) => void,
+    private inbox: () => void,
   ) {
     this.render();
   }
@@ -48,8 +54,9 @@ export class FamilyBar {
     }
     if (!force && Date.now() - this.lastFetch < 20_000) return;
     this.lastFetch = Date.now();
-    const list = await getJson<FamilyMember[]>('/api/family');
+    const [list, inbox] = await Promise.all([getJson<FamilyMember[]>('/api/family'), fetchInbox()]);
     if (list) this.members = list;
+    if (inbox) this.unread = inboxCount(inbox);
     this.render();
   }
 
@@ -57,8 +64,16 @@ export class FamilyBar {
     clear(this.el);
     const chips = h('div', { class: 'chips' });
     const gear = h('button', { class: 'chip gear', data: { open: 'settings' }, 'aria-label': t('settings.title'), on: { click: () => this.settings() } }, sprite('gear', 2));
-    this.el.append(chips, gear);
     const me = this.me();
+    const mail = h(
+      'button',
+      { class: 'chip gear mail', data: { open: 'inbox' }, 'aria-label': t('inbox.title'), on: { click: () => this.inbox() } },
+      sprite('mail', 2),
+      this.unread ? h('span', { class: 'badge', 'data-testid': 'inbox-badge' }, String(this.unread)) : null,
+    );
+    this.el.append(chips);
+    if (me) this.el.append(mail);
+    this.el.append(gear);
     if (!me) {
       chips.append(h('button', { class: 'chip login', data: { family: 'login' }, on: { click: () => this.login() } }, sprite('farmhand', 1), t('family.login')));
       return;
@@ -68,7 +83,12 @@ export class FamilyBar {
       chips.append(
         h(
           'button',
-          { class: m.id === me.id ? 'chip me' : 'chip', data: { member: String(m.id) }, on: { click: () => this.open() } },
+          {
+            class: `chip${m.id === me.id ? ' me' : ''}${m.id === this.visiting ? ' visiting' : ''}`,
+            data: { member: String(m.id) },
+            // Our own chip opens the boards; anyone else's opens their village.
+            on: { click: () => (m.id === me.id ? this.open() : this.visit(m)) },
+          },
           h('span', { class: 'avatar-wrap' }, avatar(m), m.crown ? sprite('crown', 1, t('family.crown')) : null),
           h('span', { class: 'chip-name' }, firstName(m.name)),
           m.level ? h('span', { class: 'chip-level' }, sprite('star', 1), String(m.level)) : null,

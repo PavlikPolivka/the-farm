@@ -54,13 +54,15 @@ async function boot(): Promise<void> {
 
   store.start();
   ui.welcome(awayMs, away);
-  void sync.start();
+  // Notifications about gifts and visits open the mailbox.
+  const openInbox = new URLSearchParams(location.search).get('open') === 'inbox';
+  void sync.start().then(() => {
+    if (openInbox) ui.open('inbox');
+  });
 
   const login = new URLSearchParams(location.search).get('login');
-  if (login) {
-    toast(t(login === 'forbidden' ? 'login.forbidden' : login === 'expired' ? 'login.expired' : 'login.failed'), 'lock', 5000);
-    history.replaceState(null, '', '/');
-  }
+  if (login) toast(t(login === 'forbidden' ? 'login.forbidden' : login === 'expired' ? 'login.expired' : 'login.failed'), 'lock', 5000);
+  if (location.search) history.replaceState(null, '', '/');
 
   window.__pf = { store, sync, ui, scene, game: () => minigame.current };
 }

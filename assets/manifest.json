@@ -180,6 +180,12 @@
     "license": "CC0-1.0"
   },
   {
+    "file": "sprites/gift.png",
+    "source": "scripts/assets/generated.ts",
+    "pack": "Pixel Farm (generated)",
+    "license": "CC0-1.0"
+  },
+  {
     "file": "sprites/grass-flower.png",
     "source": "https://kenney.nl/assets/tiny-town",
     "pack": "Kenney — Tiny Town (tile 2)",
@@ -217,6 +223,12 @@
   },
   {
     "file": "sprites/lock.png",
+    "source": "scripts/assets/generated.ts",
+    "pack": "Pixel Farm (generated)",
+    "license": "CC0-1.0"
+  },
+  {
+    "file": "sprites/mail.png",
     "source": "scripts/assets/generated.ts",
     "pack": "Pixel Farm (generated)",
     "license": "CC0-1.0"
@@ -331,6 +343,30 @@
   },
   {
     "file": "sprites/star.png",
+    "source": "scripts/assets/generated.ts",
+    "pack": "Pixel Farm (generated)",
+    "license": "CC0-1.0"
+  },
+  {
+    "file": "sprites/sticker-flower.png",
+    "source": "scripts/assets/generated.ts",
+    "pack": "Pixel Farm (generated)",
+    "license": "CC0-1.0"
+  },
+  {
+    "file": "sprites/sticker-heart.png",
+    "source": "scripts/assets/generated.ts",
+    "pack": "Pixel Farm (generated)",
+    "license": "CC0-1.0"
+  },
+  {
+    "file": "sprites/sticker-smile.png",
+    "source": "scripts/assets/generated.ts",
+    "pack": "Pixel Farm (generated)",
+    "license": "CC0-1.0"
+  },
+  {
+    "file": "sprites/sticker-sun.png",
     "source": "scripts/assets/generated.ts",
     "pack": "Pixel Farm (generated)",
     "license": "CC0-1.0"

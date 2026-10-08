@@ -154,7 +154,17 @@
     "pushSent": "Sent. It should arrive in a moment.",
     "tutorial": "Show the guide again",
     "credits": "Credits",
-    "creditsText": "Art: Kenney.nl (CC0). Extra pixels drawn in the same palette."
+    "creditsText": "Art: Kenney.nl (CC0). Extra pixels drawn in the same palette.",
+    "push": {
+      "gift": "Gifts",
+      "visit": "Visits",
+      "ready": "Ripe crops"
+    },
+    "quiet": {
+      "label": "Quiet hours:",
+      "start": "Quiet from",
+      "end": "Quiet until"
+    }
   },
   "tutorial": {
     "skip": "Skip",
@@ -274,5 +284,39 @@
     },
     "again": "Play again",
     "close": "Done"
+  },
+  "stickers": {
+    "heart": "Heart",
+    "flower": "Flower",
+    "sun": "Sun",
+    "smile": "Smile",
+    "star": "Star",
+    "cow": "Cow"
+  },
+  "visit": {
+    "title": "{name}'s farm",
+    "home": "Home",
+    "leaveSticker": "Leave a sticker:",
+    "stickerSent": "{name} will see your sticker.",
+    "gift": "Send a gift",
+    "noGifts": "No more gifts today",
+    "giftFor": "A gift for {name}",
+    "giftRules": "{left, plural, one {# gift left today} other {# gifts left today}}. One gift can be worth up to {cap} coins.",
+    "flower": "Flower",
+    "send": "Send",
+    "giftSent": "Gift sent to {name}!",
+    "giftFailed": "The gift couldn't be sent. Try again."
+  },
+  "inbox": {
+    "title": "Mailbox",
+    "gifts": "Gifts",
+    "visits": "Visits",
+    "noGifts": "No gifts right now.",
+    "noVisits": "Nobody has visited this week yet.",
+    "claim": "Take",
+    "claimAll": "Take all",
+    "claimed": "{count, plural, one {Gift added to your barn!} other {# gifts added to your barn!}}",
+    "from": "from {name}",
+    "visited": "{name} came by"
   }
 }

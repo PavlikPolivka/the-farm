@@ -478,3 +478,78 @@ button.big.primary, .mg-buttons button.primary { background: var(--grass); }
 @media (prefers-reduced-motion: reduce) {
   html:not(.motion-ok) .pointer img { animation: none; }
 }
+
+/* ---------------------------------------------------------------- M4: visits, gifts, mailbox */
+.chip.mail { position: relative; }
+.badge {
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  min-width: 22px;
+  height: 22px;
+  padding: 0 5px;
+  display: grid;
+  place-items: center;
+  background: var(--red);
+  color: var(--white);
+  border: 2px solid var(--outline);
+  border-radius: 11px;
+  font-size: 12px;
+}
+.chip.visiting { background: var(--sky); }
+body.visiting .hud, body.visiting .bar { display: none; }
+.visit { position: fixed; inset: auto 0 0 0; z-index: 25; pointer-events: none; }
+.visit > * { pointer-events: auto; }
+.visit-banner {
+  position: fixed;
+  left: 8px;
+  right: 8px;
+  top: calc(64px + env(safe-area-inset-top));
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 8px;
+  background: var(--paper);
+  border: 3px solid var(--outline);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+}
+.visit-title { flex: 1; min-width: 0; }
+.visit-title h2 { margin: 0; font-size: 18px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.visit-title p { margin: 0; display: flex; align-items: center; gap: 4px; }
+.visit-banner .home, .visit-panel > button {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: var(--tap);
+  padding: 6px 12px;
+  border: 3px solid var(--outline);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+}
+.visit-panel {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 8px;
+  padding: 10px 10px calc(10px + env(safe-area-inset-bottom));
+  background: var(--wood);
+  border-top: 4px solid var(--outline);
+}
+.visit-panel p { margin: 0; }
+.visit-panel > button { justify-content: center; font-size: 18px; }
+.stickers { display: grid; grid-template-columns: repeat(6, 1fr); gap: 6px; }
+.sticker { min-height: var(--tap); background: var(--paper); border: 3px solid var(--outline); border-radius: var(--radius); }
+.sticker-sent { display: flex; align-items: center; gap: 6px; font-weight: 700; }
+.gift-options { display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 8px; margin-bottom: 12px; }
+.gift-options .choice { justify-content: flex-start; }
+.stepper { display: flex; align-items: center; justify-content: center; gap: 12px; margin-bottom: 12px; }
+.stepper .step { width: var(--tap); font-size: 24px; }
+.stepper .qty { min-width: 8em; text-align: center; }
+[data-testid='gift-picker'] .panel-body > button.primary { width: 100%; }
+.inbox-head { display: flex; align-items: center; gap: 6px; margin: 4px 0 8px; font-size: 16px; }
+.inbox .cards { margin-bottom: 8px; }
+.inbox > button.primary { width: 100%; margin-bottom: 12px; }
+.push-prefs { margin-top: 8px; }
+.quiet { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; margin-top: 8px; }
+select.hour { min-height: var(--tap); font: inherit; padding: 4px 8px; border: 3px solid var(--outline); border-radius: var(--radius); background: var(--paper); }

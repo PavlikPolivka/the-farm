@@ -79,6 +79,40 @@ const MIGRATIONS: string[] = [
    );
    CREATE INDEX minigame_plays_user_day ON minigame_plays(user_id, day, game);
    ALTER TABLE daily_results ADD COLUMN finished_at INTEGER;`,
+  // M4: visits, gifts and the notification queue.
+  `CREATE TABLE visits (
+     id INTEGER PRIMARY KEY,
+     visitor_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+     owner_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+     sticker TEXT,
+     created_at INTEGER NOT NULL,
+     seen_at INTEGER
+   );
+   CREATE INDEX visits_owner ON visits(owner_id, created_at);
+   CREATE TABLE gifts (
+     id INTEGER PRIMARY KEY,
+     from_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+     to_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+     payload_json TEXT NOT NULL,
+     value REAL NOT NULL,
+     day TEXT NOT NULL,
+     created_at INTEGER NOT NULL,
+     claimed_at INTEGER
+   );
+   CREATE INDEX gifts_to ON gifts(to_id, claimed_at);
+   CREATE INDEX gifts_from_day ON gifts(from_id, to_id, day);
+   CREATE TABLE jobs (
+     id INTEGER PRIMARY KEY,
+     user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+     type TEXT NOT NULL,
+     due_at INTEGER NOT NULL,
+     sent_at INTEGER,
+     result TEXT,
+     payload_json TEXT NOT NULL DEFAULT '{}'
+   );
+   CREATE INDEX jobs_due ON jobs(sent_at, due_at);
+   CREATE INDEX jobs_user_type ON jobs(user_id, type, sent_at);
+   ALTER TABLE users ADD COLUMN prefs_json TEXT NOT NULL DEFAULT '{}';`,
 ];
 
 export function openDb(path: string): DB {

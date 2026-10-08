@@ -10,3 +10,4 @@ export { APP_VERSION } from './version.js';
 export * from './sim/validate.js';
 export * from './time.js';
 export * from './games/index.js';
+export * from './sim/social.js';

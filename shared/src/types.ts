@@ -98,3 +98,52 @@ export interface PlayResult {
   rewardsLeft: number;
   rank?: number;
 }
+
+/** GET /api/village/:userId: someone's farm as of their last sync, read-only. */
+export interface Village {
+  id: number;
+  name: string;
+  level: number;
+  crown: boolean;
+  /** The farm save (FarmState); the client catches it up to now for display. */
+  state: unknown;
+  updatedAt: number;
+  /** Gifts the caller may still send this player today. */
+  giftsLeft: number;
+}
+
+export interface InboxGift {
+  id: number;
+  from: { id: number; name: string };
+  gift: import('./sim/social.js').Gift;
+  createdAt: number;
+}
+
+export interface InboxVisit {
+  id: number;
+  visitor: { id: number; name: string };
+  sticker: import('./sim/social.js').Sticker | null;
+  createdAt: number;
+  seen: boolean;
+}
+
+/** GET /api/inbox: unclaimed gifts and the last week's visits. */
+export interface Inbox {
+  gifts: InboxGift[];
+  visits: InboxVisit[];
+}
+
+export const PUSH_TYPES = ['gift', 'visit', 'ready'] as const;
+export type PushType = (typeof PUSH_TYPES)[number];
+
+/** Per-player notification settings (GET/PUT /api/push/prefs). */
+export interface PushPrefs {
+  types: Record<PushType, boolean>;
+  /** Prague wall-clock "HH:MM"; equal start and end turns quiet hours off. */
+  quiet: { start: string; end: string };
+}
+
+export const DEFAULT_PUSH_PREFS: PushPrefs = {
+  types: { gift: true, visit: true, ready: true },
+  quiet: { start: '20:00', end: '08:00' },
+};
