@@ -14,6 +14,8 @@ export interface Config {
   adminGroups: string[];
   /** Dev-only: treat every unauthenticated request as this user. Ignored in production. */
   devFakeUser: string | null;
+  /** Dev/test-only: GET /auth/dev?as=name logs in as that player (for e2e). Ignored in production. */
+  devLogin: boolean;
 }
 
 export function loadConfig(env: NodeJS.ProcessEnv = process.env): Config {
@@ -46,6 +48,7 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): Config {
     playGroups: list(env.PLAY_GROUPS, ['pixel-farm']),
     adminGroups: list(env.ADMIN_GROUPS, ['pixel-farm-admin']),
     devFakeUser: !production && env.DEV_FAKE_USER ? env.DEV_FAKE_USER : null,
+    devLogin: !production && env.DEV_LOGIN === '1',
   };
 }
 

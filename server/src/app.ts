@@ -5,18 +5,22 @@ import { APP_VERSION } from '@pixel-farm/shared';
 import { registerAuth, requireUser } from './auth.js';
 import type { Config } from './config.js';
 import type { DB } from './db.js';
+import { registerBoards } from './boards.js';
 import { registerPush } from './push.js';
+import { registerSaves } from './saves.js';
 import { getMe } from './users.js';
 
 /** Files the browser must always revalidate, so a deploy is picked up on next launch. */
 const NO_CACHE = new Set(['/', '/index.html', '/sw.js', '/manifest.webmanifest', '/registerSW.js']);
 
-export async function buildApp(cfg: Config, db: DB): Promise<FastifyInstance> {
+export async function buildApp(cfg: Config, db: DB, clock: () => number = Date.now): Promise<FastifyInstance> {
   const app = Fastify({ logger: process.env.NODE_ENV === 'test' ? false : { level: 'info' }, trustProxy: true });
 
   await app.register(cookie, { secret: cfg.sessionSecret });
   registerAuth(app, cfg, db);
   registerPush(app, cfg, db);
+  registerSaves(app, db, clock);
+  registerBoards(app, db, clock);
 
   app.get('/healthz', async () => ({ ok: true, version: APP_VERSION }));
 

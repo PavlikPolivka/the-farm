@@ -11,7 +11,8 @@
     "shop": "Obchod",
     "barn": "Stodola",
     "orders": "Zakázky",
-    "settings": "Nastavení"
+    "settings": "Nastavení",
+    "boards": "Žebříčky"
   },
   "common": {
     "close": "Zavřít",
@@ -182,5 +183,39 @@
     "expired": "Přihlášení trvalo moc dlouho. Zkus to znovu.",
     "failed": "Přihlášení se nepovedlo. Zkus to znovu.",
     "forbidden": "Tento účet zatím nemůže hrát. Zeptej se Pavla."
+  },
+  "family": {
+    "title": "Rodina",
+    "login": "Přihlas se a hraj s rodinou"
+  },
+  "boards": {
+    "title": "Žebříčky",
+    "loginFirst": "Po přihlášení uvidíš, jak se daří celé rodině.",
+    "offline": "Farma se teď nemůže spojit se serverem. Zkus to za chvíli.",
+    "soonGames": "Minihry přibudou v některé z dalších verzí.",
+    "soonCollection": "Sběratelská kniha přibude v některé z dalších verzí.",
+    "tabs": {
+      "allTime": "Celkem",
+      "week": "Týden",
+      "daily": "Dnes",
+      "minigames": "Minihry",
+      "collector": "Sbírka",
+      "achievements": "Medaile"
+    },
+    "desc": {
+      "allTime": "Všechno, co se kdy vydělalo.",
+      "week": "Mince vydělané tento týden. V pondělí se začíná znovu.",
+      "daily": "Dnešní výzva.",
+      "minigames": "Nejlepší skóre v každé minihře.",
+      "collector": "Kolik ze Sběratelské knihy je hotovo.",
+      "achievements": "Získané úspěchy."
+    }
+  },
+  "sync": {
+    "ok": "Uloženo na serveru farmy v {time}.",
+    "syncing": "Ukládání…",
+    "offline": "Bez připojení. Farma je uložená v telefonu a pošle se později.",
+    "loaded": "Farma se načetla ze serveru.",
+    "adjusted": "Server farmy tvou farmu trochu opravil."
   }
 }

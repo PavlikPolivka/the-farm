@@ -132,6 +132,16 @@ export function registerAuth(app: FastifyInstance, cfg: Config, db: DB): void {
     return reply.redirect('/');
   });
 
+  if (cfg.devLogin) {
+    app.get<{ Querystring: { as?: string } }>('/auth/dev', async (req, reply) => {
+      const name = String(req.query.as ?? '').slice(0, 40);
+      if (!name) return reply.code(400).send({ error: 'as_required' });
+      const userId = upsertUser(db, { sub: `dev:${name}`, displayName: name, locale: 'en', isAdmin: false });
+      setSessionCookie(reply, createSession(db, userId));
+      return reply.redirect('/');
+    });
+  }
+
   app.post('/auth/logout', async (req, reply) => {
     const token = req.cookies[SESSION_COOKIE];
     if (token) deleteSession(db, token);

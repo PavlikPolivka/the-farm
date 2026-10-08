@@ -25,12 +25,14 @@ import {
   type CropId,
   type HelperId,
   type ItemId,
+  type Me,
 } from '@pixel-farm/shared';
 import type { Command, Store } from '../game/store.js';
 import { locale, t } from '../i18n/index.js';
 import { clear, h, sprite } from './dom.js';
+import { boardsSheet } from './social.js';
 
-export type SheetKind = 'shop' | 'barn' | 'orders' | 'settings' | 'seeds';
+export type SheetKind = 'shop' | 'barn' | 'orders' | 'boards' | 'settings' | 'seeds';
 
 export interface SheetCtx {
   store: Store;
@@ -42,6 +44,8 @@ export interface SheetCtx {
   /** Field whose farmhand crop is being chosen, if the seed sheet was opened for one. */
   autoField: number | null;
   settings(body: HTMLElement): () => void;
+  me(): Me | null;
+  login(): void;
 }
 
 export interface Sheet {
@@ -300,6 +304,8 @@ export function buildSheet(kind: SheetKind, ctx: SheetCtx): Sheet {
       return orders(ctx);
     case 'seeds':
       return seeds(ctx);
+    case 'boards':
+      return boardsSheet(ctx);
     case 'settings': {
       const body = h('div', { class: 'settings' });
       const update = ctx.settings(body);

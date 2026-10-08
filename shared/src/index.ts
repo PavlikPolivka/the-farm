@@ -7,3 +7,5 @@ export * from './sim/engine.js';
 export * from './sim/rng.js';
 export * from './format.js';
 export { APP_VERSION } from './version.js';
+export * from './sim/validate.js';
+export * from './time.js';

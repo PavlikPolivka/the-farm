@@ -264,6 +264,12 @@
     "license": "CC0-1.0"
   },
   {
+    "file": "sprites/trophy.png",
+    "source": "scripts/assets/generated.ts",
+    "pack": "Pixel Farm (generated)",
+    "license": "CC0-1.0"
+  },
+  {
     "file": "sprites/trough.png",
     "source": "https://kenney.nl/assets/tiny-farm",
     "pack": "Kenney — Tiny Farm (tile 113)",

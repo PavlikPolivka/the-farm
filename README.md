@@ -2,7 +2,7 @@
 
 A family pixel-art farm clicker PWA. See [docs/DESIGN.md](docs/DESIGN.md) for the spec, [docs/DECISIONS.md](docs/DECISIONS.md) for the decisions made while building, and [deploy/DEPLOY.md](deploy/DEPLOY.md) for homelab setup.
 
-**Status:** M1: single-player farm loop, playable offline. M0 passed on Android; the iPhone login test is pending.
+**Status:** M2: save sync with a plausibility clamp, family bar and six leaderboards, on top of the M1 farm loop. M0 passed on Android; the iPhone login test is pending.
 
 ## Develop
 Requires Node 22 (`nvm use`) and pnpm 10 (`corepack enable`).

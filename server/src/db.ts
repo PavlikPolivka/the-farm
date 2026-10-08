@@ -29,6 +29,41 @@ const MIGRATIONS: string[] = [
      created_at INTEGER NOT NULL
    );
    CREATE INDEX push_subs_user ON push_subs(user_id);`,
+  // M2: save sync, stats and the boards. Minigame and collection tables fill up in M3 and M5.
+  `CREATE TABLE saves (
+     user_id INTEGER PRIMARY KEY REFERENCES users(id) ON DELETE CASCADE,
+     version INTEGER NOT NULL,
+     state_json TEXT NOT NULL,
+     updated_at INTEGER NOT NULL
+   );
+   CREATE TABLE stats (
+     user_id INTEGER PRIMARY KEY REFERENCES users(id) ON DELETE CASCADE,
+     lifetime_coins REAL NOT NULL DEFAULT 0,
+     week_key TEXT NOT NULL DEFAULT '',
+     week_coins REAL NOT NULL DEFAULT 0,
+     level INTEGER NOT NULL DEFAULT 1,
+     prestige_level INTEGER NOT NULL DEFAULT 0,
+     collection_pct REAL NOT NULL DEFAULT 0,
+     achievements INTEGER NOT NULL DEFAULT 0,
+     updated_at INTEGER NOT NULL
+   );
+   CREATE TABLE daily_results (
+     user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+     date TEXT NOT NULL,
+     game TEXT NOT NULL,
+     seed INTEGER NOT NULL,
+     input_log TEXT NOT NULL,
+     score INTEGER NOT NULL,
+     created_at INTEGER NOT NULL,
+     PRIMARY KEY (user_id, date)
+   );
+   CREATE TABLE best_scores (
+     user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+     game TEXT NOT NULL,
+     best_score INTEGER NOT NULL,
+     updated_at INTEGER NOT NULL,
+     PRIMARY KEY (user_id, game)
+   );`,
 ];
 
 export function openDb(path: string): DB {

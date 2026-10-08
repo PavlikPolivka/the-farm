@@ -296,6 +296,29 @@ const BARN_ICON: SpriteDef = {
   ],
 };
 
+/** Leaderboards: a gold cup. */
+const TROPHY: SpriteDef = {
+  name: 'trophy',
+  rows: [
+    '................',
+    '...kkkkkkkkkk...',
+    '.kkkWyyyyyyYkkk.',
+    'kk.kWyyyyyyYk.kk',
+    'k..kWyyyyyyYk..k',
+    'k..kyyyyyyyYk..k',
+    'kk.kyyyyyyyYk.kk',
+    '.kkkyyyyyyYYkkk.',
+    '....kyyyyyYk....',
+    '.....kyyyYk.....',
+    '......kyYk......',
+    '......kyYk......',
+    '.....kkyYkk.....',
+    '....kBBBBBBk....',
+    '....kBbbbbBk....',
+    '....kkkkkkkk....',
+  ],
+};
+
 export const GENERATED: SpriteDef[] = [
   WINDMILL,
   windmillSails(),
@@ -309,6 +332,7 @@ export const GENERATED: SpriteDef[] = [
   LOCK,
   GEAR,
   BARN_ICON,
+  TROPHY,
 ];
 
 export function assertValid(def: SpriteDef, keys: readonly string[]): void {

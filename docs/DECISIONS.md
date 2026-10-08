@@ -46,3 +46,21 @@ The interview record in `DESIGN.md` is fixed. This file records every default Cl
 | 33 | Locale stored in localStorage until M2 moves it to the server per user | M1 is offline single-player. |
 | 34 | `window.__pf` exposes the local store for e2e/debugging | Only touches the device's own local farm; M2's server clamp limits what a doctored save can do. |
 | 35 | Balance targets are tests (`shared/src/sim/bot.test.ts`): every profile buys within 30 s and hires a helper within 5 min | M1 exit criteria, enforced in CI. Coins over 6 days are still high; prestige pacing (seeds formula) is tuned in M5. |
+
+## M2 — 2026-10-08
+
+| # | Decision | Why |
+|---|----------|-----|
+| 36 | Sync: the device keeps `{userId, version}` beside its save. On start, on return to the foreground, every 30 s and on hide (`keepalive`), it uploads with `baseVersion`. A stale version gets a 409 plus the server copy, which replaces the local farm and is caught up to now | "Server copy wins" from the design doc. At most ~30 s of play on a second device is lost. |
+| 37 | A farm never synced (played before logging in) is claimed by the first player who logs in, but only if they have no server farm yet. Otherwise their server farm loads. A device that changes player loads that player's farm, or a new one | The M1 farms on Pavel's phones carry over. Nobody inherits someone else's farm. |
+| 38 | If the server has no copy but the device has synced before (database wiped), the device re-uploads its farm as version 1 | A server restore never erases phones. |
+| 39 | Plausibility (`shared/src/sim/validate.ts`): **wealth** = lifetime coins + barn at 2× base price; only production raises it. Wealth growth ≤ 2 × (best-crop rate on every field + animals + 15 taps/s) × elapsed + one harvest per field. Orders are capped by item production, XP by harvests plus orders (paid at the level reached). Owned upgrades must be covered by lifetime coins. Elapsed uses the save's clock capped at server time + 2 min; a first upload may claim at most 7 days | One rule covers coins, barn, selling, orders and the mill without replaying actions. Tests run the bot through 2–3 days with uploads every 30 s or 6 h, and nothing is ever clamped. |
+| 40 | Clamping removes the excess from coins first, then unbacked lifetime coins, then the most valuable barn items, and sends the clamped farm back. A farm whose upgrades were never paid for is rejected (422) and replaced by the last server copy | Pavel's exit criterion: "a doctored save is clamped." Doctored upgrades can't be clamped back sensibly. |
+| 41 | `stats` is updated on every accepted save. Week coins = lifetime-coin growth since the previous save, kept per Prague week (`weekKey`, Monday 00:00 Europe/Prague) | Avoids a cron reset. A stale week reads as 0. |
+| 42 | All six boards are live. Today, Minigames, Collector and Medals say "coming in a later update" until M3/M5 fill `daily_results`, `best_scores` and the stats columns, whose tables already exist | The UI and API are final now; later milestones only add data. |
+| 43 | Ties share a rank (1, 1, 3). The family is every user in the database, so the boards show only people Authelia let in | Three players; no separate roster to maintain. |
+| 44 | Family bar = chips under the HUD (initial in a coloured circle, first name, level). Tapping opens the boards; visiting villages comes in M4. Logged out, it shows a "Log in to play with the family" chip | Avatars are a design-doc open question; initials work until then. |
+| 45 | Bottom bar has 5 buttons (Boards added, with a generated trophy sprite) | Boards need a one-tap home. |
+| 46 | `DEV_LOGIN=1` (never in production) adds `GET /auth/dev?as=name` for multi-player e2e | Playwright can't log in through Authelia. |
+| 47 | Locale stays per-device in localStorage (deferred from #33) | Each player has their own phone; nothing server-side needs the locale until M4 notifications. |
+| 48 | `buzz()` checks `typeof navigator.vibrate === 'function'` and never throws | WebKit has `vibrate` with the value undefined. The old guard threw on iPhone in the middle of the tap handler, which stopped the tutorial from advancing. Found by the M2 iPhone e2e. |

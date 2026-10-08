@@ -50,8 +50,15 @@ export interface Milestones {
 const FRAME_MS = 250;
 const T0 = Date.UTC(2026, 0, 5, 0, 0, 0); // a Monday, midnight UTC
 
-/** Runs a profile; milestone times are wall-clock seconds since the first session started. */
-export function simulate(p: Profile, untilSec = p.days * 86_400): { state: FarmState; milestones: Milestones } {
+/**
+ * Runs a profile; milestone times are wall-clock seconds since the first session started.
+ * `onFrame` sees the state after every played frame and at the start of every session.
+ */
+export function simulate(
+  p: Profile,
+  untilSec = p.days * 86_400,
+  onFrame?: (s: FarmState) => void,
+): { state: FarmState; milestones: Milestones } {
   const s = startGame(T0, 12345);
   const m: Milestones = { level: {} };
   const first = T0 + (p.sessions[0]?.[0] ?? 0) * 3_600_000;
@@ -65,6 +72,7 @@ export function simulate(p: Profile, untilSec = p.days * 86_400): { state: FarmS
       if (mark(start) >= untilSec) break;
       m.playedSec ??= 0;
       advance(s, start);
+      onFrame?.(s);
       for (let t = start; t < end && mark(t) < untilSec; t += FRAME_MS) {
         tapDebt += (p.tapsPerSec * FRAME_MS) / 1000;
         const before = { coins: s.coins, fh: helperLevel(s, 'farmhand') };
@@ -76,6 +84,7 @@ export function simulate(p: Profile, untilSec = p.days * 86_400): { state: FarmS
         const lvl = level(s);
         for (let l = 2; l <= lvl; l++) m.level[l] ??= mark(t);
         if (m.land2 === undefined && s.land >= 2) m.land2 = mark(t);
+        onFrame?.(s);
       }
     }
   }

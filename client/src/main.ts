@@ -2,6 +2,7 @@ import Phaser from 'phaser';
 import { registerSW } from 'virtual:pwa-register';
 import type { Store as StoreT } from './game/store.js';
 import { Store } from './game/store.js';
+import { Sync } from './game/sync.js';
 import { initI18n, t } from './i18n/index.js';
 import { FarmScene } from './scenes/FarmScene.js';
 import { toast } from './ui/effects.js';
@@ -11,8 +12,8 @@ import './style.css';
 
 declare global {
   interface Window {
-    /** Debug / e2e handle. Only touches this device's local farm. */
-    __pf?: { store: StoreT; ui: Ui; scene: () => FarmScene | null };
+    /** Debug / e2e handle. Edits here are uploaded like any other play, and clamped like it. */
+    __pf?: { store: StoreT; sync: Sync; ui: Ui; scene: () => FarmScene | null };
   }
 }
 
@@ -22,7 +23,8 @@ async function boot(): Promise<void> {
   await initI18n();
   setReducedMotion(prefersReducedMotion());
   const { store, awayMs, away } = await Store.open();
-  const ui = new Ui(store);
+  const sync = new Sync(store);
+  const ui = new Ui(store, sync);
 
   const game = new Phaser.Game({
     type: Phaser.AUTO,
@@ -51,7 +53,7 @@ async function boot(): Promise<void> {
 
   store.start();
   ui.welcome(awayMs, away);
-  void ui.refreshMe();
+  void sync.start();
 
   const login = new URLSearchParams(location.search).get('login');
   if (login) {
@@ -59,7 +61,7 @@ async function boot(): Promise<void> {
     history.replaceState(null, '', '/');
   }
 
-  window.__pf = { store, ui, scene };
+  window.__pf = { store, sync, ui, scene };
 }
 
 void boot();

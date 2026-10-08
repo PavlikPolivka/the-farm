@@ -28,5 +28,11 @@ export function setReducedMotion(on: boolean): void {
 
 /** Android only: iOS has no web vibration API, so nothing may depend on this. */
 export function buzz(ms = 10): void {
-  if (!prefersReducedMotion() && 'vibrate' in navigator) navigator.vibrate(ms);
+  // WebKit can expose `vibrate` as undefined, so check for a function, and never let it throw.
+  if (prefersReducedMotion() || typeof navigator.vibrate !== 'function') return;
+  try {
+    navigator.vibrate(ms);
+  } catch {
+    // ignore
+  }
 }

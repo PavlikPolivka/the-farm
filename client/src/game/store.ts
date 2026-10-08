@@ -61,11 +61,11 @@ export class Store {
     await writeSave(this.state);
   }
 
-  /** Replaces the farm (used by tests and a future "start over"). */
-  replace(state: FarmState): void {
+  /** Replaces the farm (the server copy won, or tests). Saved right away. */
+  replace(state: FarmState): Promise<void> {
     this.state = state;
     this.emit([]);
-    this.scheduleSave();
+    return this.flush();
   }
 
   private emit(events: SimEvent[]): void {

@@ -11,7 +11,8 @@
     "shop": "Shop",
     "barn": "Barn",
     "orders": "Orders",
-    "settings": "Settings"
+    "settings": "Settings",
+    "boards": "Boards"
   },
   "common": {
     "close": "Close",
@@ -182,5 +183,39 @@
     "expired": "Login took too long. Try again.",
     "failed": "Login failed. Try again.",
     "forbidden": "This account can't play yet. Ask Pavel."
+  },
+  "family": {
+    "title": "Family",
+    "login": "Log in to play with the family"
+  },
+  "boards": {
+    "title": "Boards",
+    "loginFirst": "Log in to see how the family is doing.",
+    "offline": "Can't reach the farm server. Try again in a moment.",
+    "soonGames": "Minigames are coming in a later update.",
+    "soonCollection": "The Collection Book is coming in a later update.",
+    "tabs": {
+      "allTime": "All time",
+      "week": "This week",
+      "daily": "Today",
+      "minigames": "Minigames",
+      "collector": "Collector",
+      "achievements": "Medals"
+    },
+    "desc": {
+      "allTime": "Everything ever earned.",
+      "week": "Coins earned this week. Starts again on Monday.",
+      "daily": "Today's challenge.",
+      "minigames": "Best score in each minigame.",
+      "collector": "How much of the Collection Book is filled.",
+      "achievements": "Achievements unlocked."
+    }
+  },
+  "sync": {
+    "ok": "Saved on the farm server at {time}.",
+    "syncing": "Saving…",
+    "offline": "Offline. The farm is saved on this phone and will sync later.",
+    "loaded": "Loaded your farm from the server.",
+    "adjusted": "The farm server fixed your farm a little."
   }
 }

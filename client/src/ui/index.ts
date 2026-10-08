@@ -10,10 +10,10 @@ import {
   type CropId,
   type FailReason,
   type ItemId,
-  type Me,
   type SimEvent,
 } from '@pixel-farm/shared';
 import type { Command, Store } from '../game/store.js';
+import type { Sync, SyncNotice } from '../game/sync.js';
 import { locale, t } from '../i18n/index.js';
 import type { FarmScene } from '../scenes/FarmScene.js';
 import { clear, h, sprite } from './dom.js';
@@ -21,6 +21,7 @@ import { floater, toast } from './effects.js';
 import { buzz } from './prefs.js';
 import { renderSettings } from './settings.js';
 import { ITEM_SPRITE, buildSheet, type Sheet, type SheetKind } from './sheets.js';
+import { FamilyBar } from './social.js';
 import { Tutorial } from './tutorial.js';
 
 const FAIL_TOAST: Partial<Record<FailReason, string>> = { coins: 'toast.coins', locked: 'toast.locked', items: 'toast.items' };
@@ -29,7 +30,6 @@ const SEED_KEY = 'pf:seed';
 /** Owns the DOM around the canvas: HUD, bottom bar, sheets, toasts, tutorial. */
 export class Ui {
   scene: FarmScene | null = null;
-  private me: Me | null = null;
   private sheetKind: SheetKind | null = null;
   private sheet: Sheet | null = null;
   private autoField: number | null = null;
@@ -47,18 +47,28 @@ export class Ui {
   };
   private sheetEl = h('div', { class: 'sheet', hidden: true, role: 'dialog', 'aria-modal': 'true' });
   private bar = h('nav', { class: 'bar' });
+  private family: FamilyBar;
 
-  constructor(private store: Store) {
+  constructor(
+    private store: Store,
+    private sync: Sync,
+  ) {
     try {
       const s = localStorage.getItem(SEED_KEY) as CropId | null;
       if (s && s in CROPS) this.seed = s;
     } catch {
       // ignore
     }
+    this.family = new FamilyBar(
+      () => sync.me,
+      () => this.open('boards'),
+      () => this.open('settings'),
+    );
     this.mount();
     this.tutorial = new Tutorial(store, () => this.scene, () => this.sheetKind);
     this.tutorial.render();
     store.subscribe((events) => this.onEvents(events));
+    sync.subscribe((notice) => this.onSync(notice));
     const loop = () => {
       if (this.dirty) {
         this.dirty = false;
@@ -83,6 +93,7 @@ export class Ui {
     );
     this.fillBar();
     document.getElementById('hud-slot')!.replaceWith(hud);
+    hud.after(this.family.el);
     document.body.append(this.hud.combo, this.sheetEl, this.bar);
     this.sheetEl.addEventListener('click', (e) => {
       if (e.target === this.sheetEl) this.close();
@@ -96,12 +107,13 @@ export class Ui {
     clear(this.bar);
     const btn = (kind: SheetKind, icon: string) =>
       h('button', { 'data-open': kind, on: { click: () => (this.sheetKind === kind ? this.close() : this.open(kind)) } }, sprite(icon, 2), h('span', null, t(`bar.${kind}`)));
-    this.bar.append(btn('shop', 'coin'), btn('barn', 'barn-icon'), btn('orders', 'sign'), btn('settings', 'gear'));
+    this.bar.append(btn('shop', 'coin'), btn('barn', 'barn-icon'), btn('orders', 'sign'), btn('boards', 'trophy'), btn('settings', 'gear'));
   }
 
   /** Language changed: rebuild every label. */
   relabel(): void {
     this.fillBar();
+    this.family.render();
     this.tutorial.relabel();
     if (this.sheetKind) this.open(this.sheetKind);
     this.updateHud();
@@ -140,9 +152,12 @@ export class Ui {
             this.close();
             this.tutorial.restart();
           },
-          me: () => this.me,
-          refreshMe: () => this.refreshMe(),
+          me: () => this.sync.me,
+          refreshMe: () => this.sync.refreshMe(),
+          sync: () => this.sync,
         }),
+      me: () => this.sync.me,
+      login: () => location.assign('/auth/login'),
     });
     this.sheet = sheet;
     const panel = h(
@@ -264,15 +279,13 @@ export class Ui {
     this.hud.seedLabel.textContent = t(`items.${this.seed}.name`);
   }
 
-  // ---------------------------------------------------------------- account & welcome
+  // ---------------------------------------------------------------- sync & welcome
 
-  async refreshMe(): Promise<void> {
-    try {
-      const res = await fetch('/api/me', { cache: 'no-store' });
-      this.me = res.ok ? ((await res.json()) as Me) : null;
-    } catch {
-      // offline: keep what we had
-    }
+  private onSync(notice?: SyncNotice): void {
+    this.dirty = true;
+    void this.family.refresh(notice !== undefined);
+    if (notice === 'loaded') toast(t('sync.loaded'), 'barn-icon', 4000);
+    if (notice === 'clamped' || notice === 'rejected') toast(t('sync.adjusted'), 'lock', 5000);
   }
 
   welcome(awayMs: number, events: SimEvent[]): void {
